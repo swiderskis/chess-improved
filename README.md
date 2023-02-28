@@ -20,7 +20,7 @@ During their turn, players can also input various commands, including: 'resign' 
 
 By default, the pieces are denoted in the console by their unicode characters.
 I'm not certain on how this works on Linux / Mac, but displaying these in a Windows console is... tedious.
-I managed to make this work by [enabling UTF-8 support](https://stackoverflow.com/questions/7432545/change-codepage-in-cmd-permanently), and [installing a console font](https://stackoverflow.com/questions/27483800/displaying-unicode-chess-pieces-in-windows-console) which contains symbols for the Unicode characters.
+I managed to make this work on Windows 10 by [enabling UTF-8 support](https://stackoverflow.com/questions/7432545/change-codepage-in-cmd-permanently), and [installing a console font](https://stackoverflow.com/questions/27483800/displaying-unicode-chess-pieces-in-windows-console) which contains symbols for the Unicode characters.
 This may differ for older versions of Windows or for other C++ compilers.
 
 In the future, I plan on adding a config file which allows the unicode characters to be toggled off, and replaced with regular ASCII letters (e.g. 'K' for white king, 'k' for black king).
