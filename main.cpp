@@ -19,6 +19,7 @@ int main() {
     bool legalMove = false;
 
     char desiredPieceToMove = ' ';
+    char turnChar = 'W';
 
     int turn = 0;  // indicates which player's turn it is, where white = 0 & black = 1
     int currentPosition[] = {-1, -1};
@@ -52,18 +53,18 @@ int main() {
                 continue;
             }
 
-            legalMove = checkingLegalMove(desiredPieceToMove, turn, currentPosition, desiredPosition, board);
+            legalMove = checkingLegalMove(true, desiredPieceToMove, turnChar, currentPosition, desiredPosition, board);
         }
 
         board[desiredPosition[0]][desiredPosition[1]] = board[currentPosition[0]][currentPosition[1]];
         board[desiredPosition[0]][desiredPosition[1]]->setHasMoved();
-
         board[currentPosition[0]][currentPosition[1]] = new Piece();
 
         moves.push_back(playerInput);
         legalMove = false;
 
         turn = 1 - turn;
+        turn == 0 ? turnChar = 'W' : turnChar = 'B';
     }
 
     return 0;

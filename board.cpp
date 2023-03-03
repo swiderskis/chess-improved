@@ -1,11 +1,58 @@
 #include "board.hpp"
 
+// Checks if the king is in check
+bool kingInCheck(char turnChar, Piece* board[8][8]) {
+    bool hasKingInCheck = false;
+
+    char opponentColour = ' ';
+
+    int kingPos[2] = {-1, -1};
+    int opponentPos[2] = {-1, -1};
+
+    turnChar == 'W' ? opponentColour = 'B' : opponentColour = 'W';
+
+    // Find position of king
+    for (int rank = 0; rank < 8; rank++) {
+        for (int file = 0; file < 8; file++) {
+            if (board[rank][file]->getName() == 'K' && board[rank][file]->getColour() == turnChar) {
+                kingPos[0] = rank;
+                kingPos[1] = file;
+                break;
+            }
+        }
+
+        // Breaks out of second for loop once king position found
+        if (kingPos[0] != -1 && kingPos[1] != -1)
+            break;
+    }
+
+    // See if any opponent piece can move to the king's square
+    for (int rank = 0; rank < 8; rank++) {
+        for (int file = 0; file < 8; file++) {
+            if (board[rank][file]->getColour() != turnChar && board[rank][file]->getColour() != 'N') {
+                opponentPos[0] = rank;
+                opponentPos[1] = file;
+
+                hasKingInCheck = checkingLegalMove(false, board[rank][file]->getName(), opponentColour, opponentPos, kingPos, board);
+            }
+
+            if (hasKingInCheck == true)
+                return true;
+        }
+    }
+
+    return false;
+}
+
+// Checks if the king has been checkmated
+bool kingIsCheckmated() {
+    return false;
+}
+
 // Checks the input move is legal and unambiguous
-bool checkingLegalMove(char desiredPieceToMove, int turn, int currentPosition[2], int desiredPosition[2], Piece* board[8][8]) {
+bool checkingLegalMove(bool printError, char desiredPieceToMove, char turnChar, int currentPosition[2], int desiredPosition[2], Piece* board[8][8]) {
     bool pieceMoveIsLegal = false;
     bool boardMoveIsLegal = false;
-
-    char turnChar = ' ';
 
     int rank = 0;
     int rankMax = 8;
@@ -13,10 +60,10 @@ bool checkingLegalMove(char desiredPieceToMove, int turn, int currentPosition[2]
     int fileMax = 8;
     int legalMoveCount = 0;
 
+    int tempCurrentPosition[2] = {-1, -1};
+
     const string ERROR_AMBIGUOUS_MOVE = "This move is ambiguous!\n";
     const string ERROR_ILLEGAL_MOVE = "This is not a legal move!\n";
-
-    turn == 0 ? turnChar = 'W' : turnChar = 'B';
 
     // If current position was specified in player input, this narrows the scan range in the upcoming for loops
     // Required for both performance and handling potential ambiguous moves
@@ -39,13 +86,16 @@ bool checkingLegalMove(char desiredPieceToMove, int turn, int currentPosition[2]
                 if (!pieceMoveIsLegal)
                     continue;
 
-                currentPosition[0] = rankCurr;
-                currentPosition[1] = fileCurr;
+                tempCurrentPosition[0] = rankCurr;
+                tempCurrentPosition[1] = fileCurr;
 
-                boardMoveIsLegal = legalBoardMove(desiredPieceToMove, turnChar, currentPosition, desiredPosition, board);
+                boardMoveIsLegal = legalBoardMove(desiredPieceToMove, turnChar, tempCurrentPosition, desiredPosition, board);
 
                 if (!boardMoveIsLegal)
                     continue;
+
+                currentPosition[0] = rankCurr;
+                currentPosition[1] = fileCurr;
 
                 legalMoveCount++;
             }
@@ -53,9 +103,9 @@ bool checkingLegalMove(char desiredPieceToMove, int turn, int currentPosition[2]
     }
 
     if (legalMoveCount != 1) {
-        if (legalMoveCount == 0)
+        if (!legalMoveCount && printError)
             cout << ERROR_ILLEGAL_MOVE;
-        else
+        else if (printError)
             cout << ERROR_AMBIGUOUS_MOVE;
 
         return false;
@@ -68,6 +118,14 @@ bool checkingLegalMove(char desiredPieceToMove, int turn, int currentPosition[2]
 bool legalBoardMove(char desiredPieceToMove, char turnChar, int currentPosition[2], int desiredPosition[2], Piece* board[8][8]) {
     int dRank = desiredPosition[0] - currentPosition[0];
     int dFile = desiredPosition[1] - currentPosition[1];
+
+    Piece* boardCopy[8][8];
+
+    for (int rank = 0; rank < 8; rank++) {
+        for (int file = 0; file < 8; file++) {
+            boardCopy[rank][file] = board[rank][file];
+        }
+    }
 
     // Checks if the desired position is occupied by a piece of the same colour
     if (board[desiredPosition[0]][desiredPosition[1]]->getColour() == turnChar)
@@ -97,7 +155,12 @@ bool legalBoardMove(char desiredPieceToMove, char turnChar, int currentPosition[
             dFile--;
     }
 
-    // IMPLEMENT CHECKING IF THIS MOVE PUTS OWN KING IN CHECK
+    // Checks if piece movement puts their own king in check
+    boardCopy[desiredPosition[0]][desiredPosition[1]] = boardCopy[currentPosition[0]][currentPosition[1]];
+    boardCopy[currentPosition[0]][currentPosition[1]] = new Piece();
+
+    if (kingInCheck(turnChar, boardCopy))
+        return false;
 
     return true;
 }
