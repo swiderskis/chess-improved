@@ -41,14 +41,14 @@ int main() {
         printBoard(turn, board);
 
         // Loop to handle player inputting their desired move
-        while (legalMove == false) {
+        while (!legalMove) {
             turn == 0 ? cout << "White, " : cout << "Black, ";
             cout << "please input your move:\n";
             cin >> playerInput;
 
             validInput = processPlayerInput(playerInput, &desiredPieceToMove, currentPosition, desiredPosition, board);
 
-            if (validInput == false) {
+            if (!validInput) {
                 cout << ERROR_INVALID_INPUT;
                 continue;
             }

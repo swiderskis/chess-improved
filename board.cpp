@@ -36,7 +36,7 @@ bool kingInCheck(char turnChar, Piece* board[8][8]) {
                 hasKingInCheck = checkingLegalMove(false, board[rank][file]->getName(), opponentColour, opponentPos, kingPos, board);
             }
 
-            if (hasKingInCheck == true)
+            if (hasKingInCheck)
                 return true;
         }
     }
@@ -103,7 +103,7 @@ bool checkingLegalMove(bool printError, char desiredPieceToMove, char turnChar, 
     }
 
     if (legalMoveCount != 1) {
-        if (!legalMoveCount && printError)
+        if (legalMoveCount == 0 && printError)
             cout << ERROR_ILLEGAL_MOVE;
         else if (printError)
             cout << ERROR_AMBIGUOUS_MOVE;
