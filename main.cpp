@@ -26,12 +26,15 @@ int main() {
     int desiredPosition[] = {0, 0};
 
     const string ERROR_INVALID_INPUT = "This input is not valid!\n";
+    const string ERROR_OWN_KING_IN_CHECK = "This puts your own king in check!\n";
 
     string playerInput = "";
 
     vector<string> moves;
 
     Piece* board[8][8];
+    Piece* selectedPiece;
+    Piece* destinationPiece;
 
     initialiseBoard(board);
 
@@ -54,11 +57,26 @@ int main() {
             }
 
             legalMove = checkingLegalMove(true, desiredPieceToMove, turnChar, currentPosition, desiredPosition, board);
-        }
 
-        board[desiredPosition[0]][desiredPosition[1]] = board[currentPosition[0]][currentPosition[1]];
-        board[desiredPosition[0]][desiredPosition[1]]->setHasMoved();
-        board[currentPosition[0]][currentPosition[1]] = new Piece();
+            // Check if move puts own king in check
+            if (legalMove) {
+                selectedPiece = board[currentPosition[0]][currentPosition[1]];
+                destinationPiece = board[desiredPosition[0]][desiredPosition[1]];
+
+                board[currentPosition[0]][currentPosition[1]] = new Piece();
+                board[desiredPosition[0]][desiredPosition[1]] = selectedPiece;
+
+                legalMove = !kingInCheck(turnChar, board);
+
+                if (!legalMove) {
+                    cout << ERROR_OWN_KING_IN_CHECK;
+
+                    board[currentPosition[0]][currentPosition[1]] = selectedPiece;
+                    board[desiredPosition[0]][desiredPosition[1]] = destinationPiece;
+                } else
+                    board[desiredPosition[0]][desiredPosition[1]]->setHasMoved();
+            }
+        }
 
         moves.push_back(playerInput);
         legalMove = false;

@@ -119,14 +119,6 @@ bool legalBoardMove(char desiredPieceToMove, char turnChar, int currentPosition[
     int dRank = desiredPosition[0] - currentPosition[0];
     int dFile = desiredPosition[1] - currentPosition[1];
 
-    Piece* boardCopy[8][8];
-
-    for (int rank = 0; rank < 8; rank++) {
-        for (int file = 0; file < 8; file++) {
-            boardCopy[rank][file] = board[rank][file];
-        }
-    }
-
     // Checks if the desired position is occupied by a piece of the same colour
     if (board[desiredPosition[0]][desiredPosition[1]]->getColour() == turnChar)
         return false;
@@ -140,27 +132,33 @@ bool legalBoardMove(char desiredPieceToMove, char turnChar, int currentPosition[
             return false;
     }
 
-    dRank--;
-    dFile--;
+    if (dRank > 0)
+        dRank--;
+    else if (dRank < 0)
+        dRank++;
+
+    if (dFile > 0)
+        dFile--;
+    else if (dFile < 0)
+        dFile++;
 
     // Checks if piece is obstructed
-    while (dRank > 0 && dFile > 0) {
-        if (board[currentPosition[0] + dRank][currentPosition[1] + dFile]->getColour() != 'N')
-            return false;
+    if (board[currentPosition[0]][currentPosition[1]]->getName() != 'N') {
+        while (dRank != 0 || dFile != 0) {
+            if (board[currentPosition[0] + dRank][currentPosition[1] + dFile]->getColour() != 'N')
+                return false;
 
-        if (dRank > 0)
-            dRank--;
+            if (dRank > 0)
+                dRank--;
+            else if (dRank < 0)
+                dRank++;
 
-        if (dFile > 0)
-            dFile--;
+            if (dFile > 0)
+                dFile--;
+            else if (dFile < 0)
+                dFile++;
+        }
     }
-
-    // Checks if piece movement puts their own king in check
-    boardCopy[desiredPosition[0]][desiredPosition[1]] = boardCopy[currentPosition[0]][currentPosition[1]];
-    boardCopy[currentPosition[0]][currentPosition[1]] = new Piece();
-
-    if (kingInCheck(turnChar, boardCopy))
-        return false;
 
     return true;
 }
