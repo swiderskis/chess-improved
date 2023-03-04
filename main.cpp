@@ -43,6 +43,11 @@ int main() {
         clearConsole();
         printBoard(turn, board);
 
+        if (kingInCheck(turnChar, board)) {
+            turn == 0 ? cout << "White's " : cout << "Black's ";
+            cout << "king is in check!\n";
+        }
+
         // Loop to handle player inputting their desired move
         while (!legalMove) {
             turn == 0 ? cout << "White, " : cout << "Black, ";
