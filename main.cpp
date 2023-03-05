@@ -15,9 +15,10 @@
 using std::cout, std::cin, std::string, std::vector;
 
 int main() {
-    bool validInput = false;
+    bool checkmate = false;
     bool currentlyInCheck = false;
     bool putSelfInCheck = false;
+    bool validInput = false;
 
     char desiredPieceToMove = ' ';
     char turnChar = 'W';
@@ -37,14 +38,14 @@ int main() {
 
     vector<string> moves;
 
-    Piece* board[8][8];
     Piece* selectedPiece;
     Piece* destinationPiece;
+    Piece* board[8][8];
 
     initialiseBoard(board);
 
     // Loop to handle each player move until the game is finished
-    while (1) {
+    while (!checkmate) {
         clearConsole();
         printBoard(turn, board);
 
@@ -53,7 +54,12 @@ int main() {
         if (currentlyInCheck) {
             turn == 0 ? cout << "White's " : cout << "Black's ";
             cout << "king is in check!\n";
+
+            checkmate = kingIsCheckmated(turnChar, board);
         }
+
+        if (checkmate)
+            break;
 
         // Loop to handle player inputting their desired move
         while (legalMoveCount != 1) {
@@ -114,6 +120,13 @@ int main() {
 
         turn = 1 - turn;
         turn == 0 ? turnChar = 'W' : turnChar = 'B';
+    }
+
+    if (checkmate) {
+        turn == 'W' ? moves.push_back("0-1") : moves.push_back("1-0");
+
+        turn == 'W' ? cout << "Black " : cout << "White ";
+        cout << "wins!\n";
     }
 
     return 0;

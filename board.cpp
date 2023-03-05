@@ -13,11 +13,14 @@ bool kingInCheck(char turnChar, Piece* board[8][8]) {
     // Finds position of king
     for (int rank = 0; rank < 8; rank++) {
         for (int file = 0; file < 8; file++) {
-            if (board[rank][file]->getName() == 'K' && board[rank][file]->getColour() == turnChar) {
-                kingPos[0] = rank;
-                kingPos[1] = file;
-                break;
-            }
+            if (board[rank][file]->getName() != 'K')
+                continue;
+            if (board[rank][file]->getColour() != turnChar)
+                continue;
+
+            kingPos[0] = rank;
+            kingPos[1] = file;
+            break;
         }
 
         // Breaks out of second for loop once king position found
@@ -28,12 +31,13 @@ bool kingInCheck(char turnChar, Piece* board[8][8]) {
     // Sees if any opponent piece can move to the king's square
     for (int rank = 0; rank < 8; rank++) {
         for (int file = 0; file < 8; file++) {
-            if (board[rank][file]->getColour() != turnChar && board[rank][file]->getColour() != 'N') {
-                opponentPos[0] = rank;
-                opponentPos[1] = file;
+            if (board[rank][file]->getColour() != opponentColour)
+                continue;
 
-                hasKingInCheckCount = checkingLegalMove(board[rank][file]->getName(), opponentColour, opponentPos, kingPos, board);
-            }
+            opponentPos[0] = rank;
+            opponentPos[1] = file;
+
+            hasKingInCheckCount = checkingLegalMove(board[rank][file]->getName(), opponentColour, opponentPos, kingPos, board);
 
             if (hasKingInCheckCount > 0)
                 return true;
@@ -44,7 +48,20 @@ bool kingInCheck(char turnChar, Piece* board[8][8]) {
 }
 
 // Checks if the king has been checkmated
-bool kingIsCheckmated() {
+bool kingIsCheckmated(char turnChar, Piece* board[8][8]) {
+    for (int rankCurr = 0; rankCurr < 8; rankCurr++) {
+        for (int fileCurr = 0; fileCurr < 8; fileCurr++) {
+            if (board[rankCurr][fileCurr]->getColour() != turnChar) {
+                continue;
+            }
+
+            for (int rankNew = 0; rankNew < 8; rankNew++) {
+                for (int rankNew = 0; rankNew < 8; rankNew++) {
+                }
+            }
+        }
+    }
+
     return false;
 }
 
@@ -76,22 +93,24 @@ bool legalBoardMove(char desiredPieceToMove, char turnChar, int currentPosition[
     else if (dFile < 0)
         dFile++;
 
+    // Skips obstruction check if piece is a knight
+    if (board[currentPosition[0]][currentPosition[1]]->getName() == 'N')
+        return true;
+
     // Checks if piece is obstructed
-    if (board[currentPosition[0]][currentPosition[1]]->getName() != 'N') {
-        while (dRank != 0 || dFile != 0) {
-            if (board[currentPosition[0] + dRank][currentPosition[1] + dFile]->getColour() != 'N')
-                return false;
+    while (dRank != 0 || dFile != 0) {
+        if (board[currentPosition[0] + dRank][currentPosition[1] + dFile]->getColour() != 'N')
+            return false;
 
-            if (dRank > 0)
-                dRank--;
-            else if (dRank < 0)
-                dRank++;
+        if (dRank > 0)
+            dRank--;
+        else if (dRank < 0)
+            dRank++;
 
-            if (dFile > 0)
-                dFile--;
-            else if (dFile < 0)
-                dFile++;
-        }
+        if (dFile > 0)
+            dFile--;
+        else if (dFile < 0)
+            dFile++;
     }
 
     return true;
@@ -125,25 +144,29 @@ int checkingLegalMove(char desiredPieceToMove, char turnChar, int currentPositio
     // Scans the board to find the desired piece to move, and determines if this move is legal
     for (int rankCurr = rank; rankCurr < rankMax; rankCurr++) {
         for (int fileCurr = file; fileCurr < fileMax; fileCurr++) {
-            if (board[rankCurr][fileCurr]->getName() == desiredPieceToMove && board[rankCurr][fileCurr]->getColour() == turnChar) {
-                pieceMoveIsLegal = board[rankCurr][fileCurr]->legalPieceMove(rankCurr, fileCurr, desiredPosition);
+            if (board[rankCurr][fileCurr]->getName() != desiredPieceToMove)
+                continue;
 
-                if (!pieceMoveIsLegal)
-                    continue;
+            if (board[rankCurr][fileCurr]->getColour() != turnChar)
+                continue;
 
-                tempCurrentPosition[0] = rankCurr;
-                tempCurrentPosition[1] = fileCurr;
+            pieceMoveIsLegal = board[rankCurr][fileCurr]->legalPieceMove(rankCurr, fileCurr, desiredPosition);
 
-                boardMoveIsLegal = legalBoardMove(desiredPieceToMove, turnChar, tempCurrentPosition, desiredPosition, board);
+            if (!pieceMoveIsLegal)
+                continue;
 
-                if (!boardMoveIsLegal)
-                    continue;
+            tempCurrentPosition[0] = rankCurr;
+            tempCurrentPosition[1] = fileCurr;
 
-                currentPosition[0] = rankCurr;
-                currentPosition[1] = fileCurr;
+            boardMoveIsLegal = legalBoardMove(desiredPieceToMove, turnChar, tempCurrentPosition, desiredPosition, board);
 
-                legalMoveCount++;
-            }
+            if (!boardMoveIsLegal)
+                continue;
+
+            currentPosition[0] = rankCurr;
+            currentPosition[1] = fileCurr;
+
+            legalMoveCount++;
         }
     }
 
