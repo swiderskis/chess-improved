@@ -2,16 +2,15 @@
 
 // Checks if the king is in check
 bool kingInCheck(char turnChar, Piece* board[8][8]) {
-    bool hasKingInCheck = false;
-
     char opponentColour = ' ';
 
+    int hasKingInCheckCount = 0;
     int kingPos[2] = {-1, -1};
     int opponentPos[2] = {-1, -1};
 
     turnChar == 'W' ? opponentColour = 'B' : opponentColour = 'W';
 
-    // Find position of king
+    // Finds position of king
     for (int rank = 0; rank < 8; rank++) {
         for (int file = 0; file < 8; file++) {
             if (board[rank][file]->getName() == 'K' && board[rank][file]->getColour() == turnChar) {
@@ -26,17 +25,17 @@ bool kingInCheck(char turnChar, Piece* board[8][8]) {
             break;
     }
 
-    // See if any opponent piece can move to the king's square
+    // Sees if any opponent piece can move to the king's square
     for (int rank = 0; rank < 8; rank++) {
         for (int file = 0; file < 8; file++) {
             if (board[rank][file]->getColour() != turnChar && board[rank][file]->getColour() != 'N') {
                 opponentPos[0] = rank;
                 opponentPos[1] = file;
 
-                hasKingInCheck = checkingLegalMove(false, board[rank][file]->getName(), opponentColour, opponentPos, kingPos, board);
+                hasKingInCheckCount = checkingLegalMove(board[rank][file]->getName(), opponentColour, opponentPos, kingPos, board);
             }
 
-            if (hasKingInCheck)
+            if (hasKingInCheckCount > 0)
                 return true;
         }
     }
@@ -47,71 +46,6 @@ bool kingInCheck(char turnChar, Piece* board[8][8]) {
 // Checks if the king has been checkmated
 bool kingIsCheckmated() {
     return false;
-}
-
-// Checks the input move is legal and unambiguous
-bool checkingLegalMove(bool printError, char desiredPieceToMove, char turnChar, int currentPosition[2], int desiredPosition[2], Piece* board[8][8]) {
-    bool pieceMoveIsLegal = false;
-    bool boardMoveIsLegal = false;
-
-    int rank = 0;
-    int rankMax = 8;
-    int file = 0;
-    int fileMax = 8;
-    int legalMoveCount = 0;
-
-    int tempCurrentPosition[2] = {-1, -1};
-
-    const string ERROR_AMBIGUOUS_MOVE = "This move is ambiguous!\n";
-    const string ERROR_ILLEGAL_MOVE = "This is not a legal move!\n";
-
-    // If current position was specified in player input, this narrows the scan range in the upcoming for loops
-    // Required for both performance and handling potential ambiguous moves
-    if (currentPosition[0] != -1) {
-        rank = currentPosition[0];
-        rankMax = rank + 1;
-    }
-
-    if (currentPosition[1] != -1) {
-        file = currentPosition[1];
-        fileMax = file + 1;
-    }
-
-    // Scans the board to find the desired piece to move, and determines if this move is legal
-    for (int rankCurr = rank; rankCurr < rankMax; rankCurr++) {
-        for (int fileCurr = file; fileCurr < fileMax; fileCurr++) {
-            if (board[rankCurr][fileCurr]->getName() == desiredPieceToMove && board[rankCurr][fileCurr]->getColour() == turnChar) {
-                pieceMoveIsLegal = board[rankCurr][fileCurr]->legalPieceMove(rankCurr, fileCurr, desiredPosition);
-
-                if (!pieceMoveIsLegal)
-                    continue;
-
-                tempCurrentPosition[0] = rankCurr;
-                tempCurrentPosition[1] = fileCurr;
-
-                boardMoveIsLegal = legalBoardMove(desiredPieceToMove, turnChar, tempCurrentPosition, desiredPosition, board);
-
-                if (!boardMoveIsLegal)
-                    continue;
-
-                currentPosition[0] = rankCurr;
-                currentPosition[1] = fileCurr;
-
-                legalMoveCount++;
-            }
-        }
-    }
-
-    if (legalMoveCount != 1) {
-        if (legalMoveCount == 0 && printError)
-            cout << ERROR_ILLEGAL_MOVE;
-        else if (printError)
-            cout << ERROR_AMBIGUOUS_MOVE;
-
-        return false;
-    }
-
-    return true;
 }
 
 // Checks if a move is legal in the context of the board (i.e. piece is not blocked, move does not put king in check)
@@ -161,6 +95,59 @@ bool legalBoardMove(char desiredPieceToMove, char turnChar, int currentPosition[
     }
 
     return true;
+}
+
+// Checks the input move is legal and unambiguous
+int checkingLegalMove(char desiredPieceToMove, char turnChar, int currentPosition[2], int desiredPosition[2], Piece* board[8][8]) {
+    bool pieceMoveIsLegal = false;
+    bool boardMoveIsLegal = false;
+
+    int rank = 0;
+    int rankMax = 8;
+    int file = 0;
+    int fileMax = 8;
+    int legalMoveCount = 0;
+
+    int tempCurrentPosition[2] = {-1, -1};
+
+    // If current position was specified in player input, this narrows the scan range in the upcoming for loops
+    // Required for both performance and handling potential ambiguous moves
+    if (currentPosition[0] != -1) {
+        rank = currentPosition[0];
+        rankMax = rank + 1;
+    }
+
+    if (currentPosition[1] != -1) {
+        file = currentPosition[1];
+        fileMax = file + 1;
+    }
+
+    // Scans the board to find the desired piece to move, and determines if this move is legal
+    for (int rankCurr = rank; rankCurr < rankMax; rankCurr++) {
+        for (int fileCurr = file; fileCurr < fileMax; fileCurr++) {
+            if (board[rankCurr][fileCurr]->getName() == desiredPieceToMove && board[rankCurr][fileCurr]->getColour() == turnChar) {
+                pieceMoveIsLegal = board[rankCurr][fileCurr]->legalPieceMove(rankCurr, fileCurr, desiredPosition);
+
+                if (!pieceMoveIsLegal)
+                    continue;
+
+                tempCurrentPosition[0] = rankCurr;
+                tempCurrentPosition[1] = fileCurr;
+
+                boardMoveIsLegal = legalBoardMove(desiredPieceToMove, turnChar, tempCurrentPosition, desiredPosition, board);
+
+                if (!boardMoveIsLegal)
+                    continue;
+
+                currentPosition[0] = rankCurr;
+                currentPosition[1] = fileCurr;
+
+                legalMoveCount++;
+            }
+        }
+    }
+
+    return legalMoveCount;
 }
 
 // Initialises board
