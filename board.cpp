@@ -59,7 +59,7 @@ bool kingIsCheckmated(char turnChar, Piece* board[8][8]) {
     Piece* selectedPiece;
     Piece* destinationPiece;
 
-    // Find a piece that belongs to player
+    // Finds a piece that belongs to player
     for (int rankCurr = 0; rankCurr < 8; rankCurr++) {
         for (int fileCurr = 0; fileCurr < 8; fileCurr++) {
             if (board[rankCurr][fileCurr]->getColour() != turnChar)
@@ -68,7 +68,7 @@ bool kingIsCheckmated(char turnChar, Piece* board[8][8]) {
             currentPosition[0] = rankCurr;
             currentPosition[1] = fileCurr;
 
-            // Find a legal move for that piece and see if takes the king out of check
+            // Finds a legal move for that piece and sees if it takes the king out of check
             for (int rankNew = 0; rankNew < 8; rankNew++) {
                 for (int fileNew = 0; fileNew < 8; fileNew++) {
                     desiredPosition[0] = rankNew;
@@ -210,6 +210,7 @@ int checkingLegalMove(char desiredPieceToMove, char turnChar, int currentPositio
 
 // Initialises board
 void initialiseBoard(Piece* board[8][8]) {
+#if 0
     // Initialise empty board spaces
     for (int rank = 2; rank < 7; rank++) {
         for (int file = 0; file < 8; file++) {
@@ -243,6 +244,19 @@ void initialiseBoard(Piece* board[8][8]) {
     board[7][5] = new PieceBishop('B');
     board[7][6] = new PieceKnight('B');
     board[7][7] = new PieceRook('B');
+
+#else
+    for (int rank = 0; rank < 8; rank++) {
+        for (int file = 0; file < 8; file++) {
+            board[rank][file] = new Piece();
+        }
+    }
+
+    board[0][0] = new PieceKing('W');
+    board[7][7] = new PieceKing('B');
+    board[1][7] = new PiecePawn('B');
+
+#endif
 }
 
 // Prints the current board state, flipping it based on the current player's turn

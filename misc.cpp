@@ -1,8 +1,9 @@
 #include "misc.hpp"
 
 // Takes the player's input and interprets the intended move
-bool processPlayerInput(string playerInput, char* pDesiredPieceToMove, int currentPosition[2], int desiredPosition[2], Piece* board[8][8]) {
+bool processPlayerInput(string playerInput, char* pDesiredPieceToMove, char* pPromotedPiece, int currentPosition[2], int desiredPosition[2], Piece* board[8][8]) {
     string pieces = "KQRBN";
+    string promotionPieces = "QRBN";
 
     if (playerInput.back() == '+' || playerInput.back() == '#')
         playerInput.pop_back();
@@ -14,11 +15,15 @@ bool processPlayerInput(string playerInput, char* pDesiredPieceToMove, int curre
         return false;
     }
 
-    // Handles if pawn promotion is state in desired move
-    // IMPLEMENT PROMOTING
+    // Handles if pawn promotion is stated in desired move
     if (playerInput[playerInput.length() - 2] == '=') {
-        cout << "Promoting is not yet implemented\n";
-        return false;
+        if (find(begin(promotionPieces), end(promotionPieces), playerInput.back()) == end(promotionPieces))
+            return false;
+
+        *pPromotedPiece = playerInput.back();
+
+        playerInput.pop_back();
+        playerInput.pop_back();
     }
 
     // Takes last element of playerInput to get desired rank

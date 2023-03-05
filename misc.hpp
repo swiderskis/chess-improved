@@ -10,7 +10,7 @@
 using std::cout, std::string, std::vector, std::begin, std::end, std::find, std::system;
 
 // Takes the player's input and interprets the intended move
-bool processPlayerInput(string playerInput, char* pDesiredPieceToMove, int* pCurrentPosition, int* pDesiredPosition, Piece* board[8][8]);
+bool processPlayerInput(string playerInput, char* pDesiredPieceToMove, char* pPromotedPiece, int currentPosition[2], int desiredPosition[2], Piece* board[8][8]);
 
 // Converts an integer stored as a char to an int
 int charToInt(char character);

@@ -21,6 +21,7 @@ int main() {
     bool validInput = false;
 
     char desiredPieceToMove = ' ';
+    char promotionPiece = ' ';
     char turnChar = 'W';
 
     int legalMoveCount = 0;
@@ -31,7 +32,8 @@ int main() {
     const string ERROR_AMBIGUOUS_MOVE = "This move is ambiguous!\n";
     const string ERROR_ILLEGAL_MOVE = "This is not a legal move!\n";
     const string ERROR_INVALID_INPUT = "This input is not valid!\n";
-    const string ERROR_OWN_KING_STILL_IN_CHECK = "Your own king is still in check!\n";
+    const string ERROR_MUST_SPECIFY_PROMOTION_PIECE = "You must specify a promotion piece!\n";
+    const string ERROR_OWN_KING_STILL_IN_CHECK = "Your king is still in check!\n";
     const string ERROR_PUTS_OWN_KING_IN_CHECK = "This puts your own king in check!\n";
 
     string playerInput = "";
@@ -69,12 +71,19 @@ int main() {
             cin >> playerInput;
 
             // Checks if input is valid
-            validInput = processPlayerInput(playerInput, &desiredPieceToMove, currentPosition, desiredPosition, board);
+            validInput = processPlayerInput(playerInput, &desiredPieceToMove, &promotionPiece, currentPosition, desiredPosition, board);
 
             if (!validInput) {
                 cout << ERROR_INVALID_INPUT;
                 continue;
             }
+
+            // Ensures promotion piece is specified if pawn reaches last rank
+            if (desiredPieceToMove == 'P' && promotionPiece == ' ')
+                if ((turnChar == 'W' && desiredPosition[0] == 7) || (turnChar == 'B' && desiredPosition[0] == 0)) {
+                    cout << ERROR_MUST_SPECIFY_PROMOTION_PIECE;
+                    continue;
+                }
 
             // Ensures move is legal and unambiguous
             legalMoveCount = checkingLegalMove(desiredPieceToMove, turnChar, currentPosition, desiredPosition, board);
@@ -94,7 +103,28 @@ int main() {
             destinationPiece = board[desiredPosition[0]][desiredPosition[1]];
 
             board[currentPosition[0]][currentPosition[1]] = new Piece();
-            board[desiredPosition[0]][desiredPosition[1]] = selectedPiece;
+
+            switch (promotionPiece) {
+                case 'Q':
+                    board[desiredPosition[0]][desiredPosition[1]] = new PieceQueen(turnChar);
+                    break;
+
+                case 'R':
+                    board[desiredPosition[0]][desiredPosition[1]] = new PieceRook(turnChar);
+                    break;
+
+                case 'B':
+                    board[desiredPosition[0]][desiredPosition[1]] = new PieceBishop(turnChar);
+                    break;
+
+                case 'N':
+                    board[desiredPosition[0]][desiredPosition[1]] = new PieceKnight(turnChar);
+                    break;
+
+                default:
+                    board[desiredPosition[0]][desiredPosition[1]] = selectedPiece;
+                    break;
+            }
 
             // Checks if move has put own king in check
             putSelfInCheck = kingInCheck(turnChar, board);
@@ -116,8 +146,10 @@ int main() {
             board[desiredPosition[0]][desiredPosition[1]]->setHasMoved();
         }
 
-        moves.push_back(playerInput);
         legalMoveCount = 0;
+        promotionPiece = ' ';
+
+        moves.push_back(playerInput);
 
         turn = 1 - turn;
         turn == 0 ? turnChar = 'W' : turnChar = 'B';
