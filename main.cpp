@@ -128,8 +128,6 @@ int main() {
 
         turn == 'W' ? cout << "White " : cout << "Black ";
         cout << "wins!\n";
-
-        cin >> playerInput;
     }
 
     return 0;
