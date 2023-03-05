@@ -124,9 +124,9 @@ int main() {
     }
 
     if (checkmate) {
-        turn == 'W' ? moves.push_back("0-1") : moves.push_back("1-0");
+        turn == 0 ? moves.push_back("0-1") : moves.push_back("1-0");
 
-        turn == 'W' ? cout << "White " : cout << "Black ";
+        turn == 0 ? cout << "Black " : cout << "White ";
         cout << "wins!\n";
     }
 
