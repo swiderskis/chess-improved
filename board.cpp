@@ -210,7 +210,6 @@ int checkingLegalMove(char desiredPieceToMove, char turnChar, int currentPositio
 
 // Initialises board
 void initialiseBoard(Piece* board[8][8]) {
-#if 0
     // Initialise empty board spaces
     for (int rank = 2; rank < 7; rank++) {
         for (int file = 0; file < 8; file++) {
@@ -244,19 +243,6 @@ void initialiseBoard(Piece* board[8][8]) {
     board[7][5] = new PieceBishop('B');
     board[7][6] = new PieceKnight('B');
     board[7][7] = new PieceRook('B');
-
-#else
-    for (int rank = 0; rank < 8; rank++) {
-        for (int file = 0; file < 8; file++) {
-            board[rank][file] = new Piece();
-        }
-    }
-
-    board[0][0] = new PieceKing('W');
-    board[7][7] = new PieceKing('B');
-    board[1][7] = new PiecePawn('B');
-
-#endif
 }
 
 // Prints the current board state, flipping it based on the current player's turn
