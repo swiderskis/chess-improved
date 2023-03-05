@@ -15,6 +15,7 @@ bool kingInCheck(char turnChar, Piece* board[8][8]) {
         for (int file = 0; file < 8; file++) {
             if (board[rank][file]->getName() != 'K')
                 continue;
+
             if (board[rank][file]->getColour() != turnChar)
                 continue;
 
@@ -49,23 +50,57 @@ bool kingInCheck(char turnChar, Piece* board[8][8]) {
 
 // Checks if the king has been checkmated
 bool kingIsCheckmated(char turnChar, Piece* board[8][8]) {
+    bool check = false;
+
+    int legalMoveCount = 0;
+    int currentPosition[] = {-1, -1};
+    int desiredPosition[] = {-1, -1};
+
+    Piece* selectedPiece;
+    Piece* destinationPiece;
+
+    // Find a piece that belongs to player
     for (int rankCurr = 0; rankCurr < 8; rankCurr++) {
         for (int fileCurr = 0; fileCurr < 8; fileCurr++) {
-            if (board[rankCurr][fileCurr]->getColour() != turnChar) {
+            if (board[rankCurr][fileCurr]->getColour() != turnChar)
                 continue;
-            }
 
+            currentPosition[0] = rankCurr;
+            currentPosition[1] = fileCurr;
+
+            // Find a legal move for that piece and see if takes the king out of check
             for (int rankNew = 0; rankNew < 8; rankNew++) {
-                for (int rankNew = 0; rankNew < 8; rankNew++) {
+                for (int fileNew = 0; fileNew < 8; fileNew++) {
+                    desiredPosition[0] = rankNew;
+                    desiredPosition[1] = fileNew;
+
+                    legalMoveCount = checkingLegalMove(board[rankCurr][fileCurr]->getName(), turnChar, currentPosition, desiredPosition, board);
+
+                    if (legalMoveCount != 1)
+                        continue;
+
+                    selectedPiece = board[rankCurr][fileCurr];
+                    destinationPiece = board[rankNew][fileNew];
+
+                    board[rankCurr][fileCurr] = new Piece();
+                    board[rankNew][fileNew] = selectedPiece;
+
+                    check = kingInCheck(turnChar, board);
+
+                    board[rankCurr][fileCurr] = selectedPiece;
+                    board[rankNew][fileNew] = destinationPiece;
+
+                    if (!check)
+                        return false;
                 }
             }
         }
     }
 
-    return false;
+    return true;
 }
 
-// Checks if a move is legal in the context of the board (i.e. piece is not blocked, move does not put king in check)
+// Checks if a move is legal in the context of the board (i.e. piece is not obsctructed, pawn is capturing / pushing correctly)
 bool legalBoardMove(char desiredPieceToMove, char turnChar, int currentPosition[2], int desiredPosition[2], Piece* board[8][8]) {
     int dRank = desiredPosition[0] - currentPosition[0];
     int dFile = desiredPosition[1] - currentPosition[1];

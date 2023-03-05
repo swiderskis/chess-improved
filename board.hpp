@@ -19,7 +19,7 @@ bool kingInCheck(char turnChar, Piece* board[8][8]);
 // Checks if the king has been checkmated
 bool kingIsCheckmated(char turnChar, Piece* board[8][8]);
 
-// Checks if a move is legal in the context of the board (i.e. piece is not blocked, move does not put king in check)
+// Checks if a move is legal in the context of the board (i.e. piece is not obsctructed, pawn is capturing / pushing correctly)
 bool legalBoardMove(char desiredPieceToMove, char turnChar, int currentPosition[2], int desiredPosition[2], Piece* board[8][8]);
 
 // Checks the input move is legal and unambiguous

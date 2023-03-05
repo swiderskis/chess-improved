@@ -15,8 +15,8 @@
 using std::cout, std::cin, std::string, std::vector;
 
 int main() {
+    bool check = false;
     bool checkmate = false;
-    bool currentlyInCheck = false;
     bool putSelfInCheck = false;
     bool validInput = false;
 
@@ -45,21 +45,22 @@ int main() {
     initialiseBoard(board);
 
     // Loop to handle each player move until the game is finished
-    while (!checkmate) {
+    while (1) {
         clearConsole();
         printBoard(turn, board);
 
-        currentlyInCheck = kingInCheck(turnChar, board);
+        check = kingInCheck(turnChar, board);
 
-        if (currentlyInCheck) {
-            turn == 0 ? cout << "White's " : cout << "Black's ";
-            cout << "king is in check!\n";
-
+        if (check)
             checkmate = kingIsCheckmated(turnChar, board);
-        }
 
         if (checkmate)
             break;
+
+        if (check) {
+            turn == 0 ? cout << "White's " : cout << "Black's ";
+            cout << "king is in check!\n";
+        }
 
         // Loop to handle player inputting their desired move
         while (legalMoveCount != 1) {
@@ -99,7 +100,7 @@ int main() {
             putSelfInCheck = kingInCheck(turnChar, board);
 
             if (putSelfInCheck) {
-                if (currentlyInCheck)
+                if (check)
                     cout << ERROR_OWN_KING_STILL_IN_CHECK;
                 else
                     cout << ERROR_PUTS_OWN_KING_IN_CHECK;
@@ -125,8 +126,10 @@ int main() {
     if (checkmate) {
         turn == 'W' ? moves.push_back("0-1") : moves.push_back("1-0");
 
-        turn == 'W' ? cout << "Black " : cout << "White ";
+        turn == 'W' ? cout << "White " : cout << "Black ";
         cout << "wins!\n";
+
+        cin >> playerInput;
     }
 
     return 0;
