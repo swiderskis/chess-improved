@@ -7,6 +7,10 @@ Piece::Piece() : mHasMoved(false), mColour('N'), mName('_'), mSymbol(" ") {}
 Piece::Piece(char colour) : mHasMoved(false), mColour(colour) {}
 
 // Methods
+bool Piece::getHasMoved() {
+    return mHasMoved;
+}
+
 bool Piece::legalPieceMove(int currentRank, int currentFile, int desiredPosition[]) {
     return false;
 }

@@ -30,6 +30,7 @@ int main() {
     int desiredPosition[] = {0, 0};
 
     const string ERROR_AMBIGUOUS_MOVE = "This move is ambiguous!\n";
+    const string ERROR_CANNOT_CASTLE_WHILE_IN_CHECK = "You cannot castle while in check!\n";
     const string ERROR_ILLEGAL_MOVE = "This is not a legal move!\n";
     const string ERROR_INVALID_INPUT = "This input is not valid!\n";
     const string ERROR_MUST_SPECIFY_PROMOTION_PIECE = "You must specify a promotion piece!\n";
@@ -71,11 +72,24 @@ int main() {
             cin >> playerInput;
 
             // Checks if input is valid
-            validInput = processPlayerInput(playerInput, &desiredPieceToMove, &promotionPiece, currentPosition, desiredPosition, board);
+            validInput = processPlayerInput(turnChar, &desiredPieceToMove, &promotionPiece, currentPosition, desiredPosition, playerInput, board);
 
             if (!validInput) {
                 cout << ERROR_INVALID_INPUT;
                 continue;
+            }
+
+            // Handles castling
+            if (playerInput.find("O-O") != string::npos) {
+                if (check) {
+                    cout << ERROR_CANNOT_CASTLE_WHILE_IN_CHECK;
+                    continue;
+                }
+
+                if (!castlingValid(turnChar, currentPosition, desiredPosition, board))
+                    continue;
+
+                legalMoveCount = 1;
             }
 
             // Ensures promotion piece is specified if pawn reaches last rank
@@ -86,7 +100,8 @@ int main() {
                 }
 
             // Ensures move is legal and unambiguous
-            legalMoveCount = checkingLegalMove(desiredPieceToMove, turnChar, currentPosition, desiredPosition, board);
+            if (playerInput.find("O-O") == string::npos)  // skip if castling (handled above)
+                legalMoveCount = checkingLegalMove(desiredPieceToMove, turnChar, currentPosition, desiredPosition, board);
 
             if (legalMoveCount == 0) {
                 cout << ERROR_ILLEGAL_MOVE;
@@ -146,6 +161,22 @@ int main() {
             }
 
             board[desiredPosition[0]][desiredPosition[1]]->setHasMoved();
+
+            // Moves the rook if castling
+            if (playerInput.find("O-O") == string::npos)
+                continue;
+
+            if (desiredPosition[1] == 2) {
+                board[currentPosition[0]][3] = board[currentPosition[0]][0];
+                board[currentPosition[0]][0] = new Piece();
+                board[currentPosition[0]][3]->setHasMoved();
+            }
+
+            if (desiredPosition[1] == 6) {
+                board[currentPosition[0]][5] = board[currentPosition[0]][7];
+                board[currentPosition[0]][7] = new Piece();
+                board[currentPosition[0]][5]->setHasMoved();
+            }
         }
 
         legalMoveCount = 0;

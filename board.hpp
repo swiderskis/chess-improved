@@ -13,6 +13,9 @@
 
 using std::cout;
 
+// Checks if castling is valid
+bool castlingValid(char turnChar, int currentPosition[2], int desiredPosition[2], Piece* board[8][8]);
+
 // Checks if the king is in check
 bool kingInCheck(char turnChar, Piece* board[8][8]);
 

@@ -1,5 +1,79 @@
 #include "board.hpp"
 
+// Checks if castling is valid
+bool castlingValid(char turnChar, int currentPosition[2], int desiredPosition[2], Piece* board[8][8]) {
+    bool castlingPrevented = false;
+
+    char opponentColour = ' ';
+
+    int castlingThroughSquare[2] = {-1, -1};
+    int opponentPos[2] = {-1, -1};
+
+    const string ERROR_CASTLING_OBSTRUCTED = "A piece is obstructing your ability to castle!\n";
+    const string ERROR_CASTLING_SQUARE_ATTACKED = "An enemy piece is attacking the square your king is trying to castle through!\n";
+
+    turnChar == 'W' ? opponentColour = 'B' : opponentColour = 'W';
+
+    castlingThroughSquare[0] = currentPosition[0];
+
+    // Check if castling is obstructed
+    if (desiredPosition[1] == 2) {
+        for (int file = 1; file < 4; file++) {
+            if (board[currentPosition[0]][file]->getName() != '_') {
+                castlingPrevented = true;
+                break;
+            }
+        }
+    }
+
+    if (desiredPosition[1] == 6) {
+        for (int file = 5; file < 7; file++) {
+            if (board[currentPosition[0]][file]->getName() != '_') {
+                castlingPrevented = true;
+                break;
+            }
+        }
+    }
+
+    if (castlingPrevented) {
+        cout << ERROR_CASTLING_OBSTRUCTED;
+        return false;
+    }
+
+    // Check if a piece is attacking one of the squares the king tries to castle through
+    if (desiredPosition[1] == 2)
+        castlingThroughSquare[1] = 3;
+
+    if (desiredPosition[1] == 6)
+        castlingThroughSquare[1] = 5;
+
+    for (int rank = 0; rank < 8; rank++) {
+        for (int file = 0; file < 8; file++) {
+            opponentPos[0] = rank;
+            opponentPos[1] = file;
+
+            if (board[rank][file]->getColour() != opponentColour)
+                continue;
+
+            if (checkingLegalMove(board[rank][file]->getName(), opponentColour, opponentPos, castlingThroughSquare, board))
+                castlingPrevented = true;
+
+            if (castlingPrevented)
+                break;
+        }
+
+        if (castlingPrevented)
+            break;
+    }
+
+    if (castlingPrevented) {
+        cout << ERROR_CASTLING_SQUARE_ATTACKED;
+        return false;
+    }
+
+    return true;
+}
+
 // Checks if the king is in check
 bool kingInCheck(char turnChar, Piece* board[8][8]) {
     char opponentColour = ' ';
@@ -21,6 +95,7 @@ bool kingInCheck(char turnChar, Piece* board[8][8]) {
 
             kingPos[0] = rank;
             kingPos[1] = file;
+
             break;
         }
 

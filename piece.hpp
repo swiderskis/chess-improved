@@ -22,6 +22,8 @@ class Piece {
     Piece(char colour);
 
     // Methods
+    bool getHasMoved();
+
     virtual bool legalPieceMove(int currentRank, int currentFile, int desiredPosition[]);
 
     char getColour();

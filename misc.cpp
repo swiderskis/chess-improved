@@ -1,7 +1,7 @@
 #include "misc.hpp"
 
 // Takes the player's input and interprets the intended move
-bool processPlayerInput(string playerInput, char* pDesiredPieceToMove, char* pPromotedPiece, int currentPosition[2], int desiredPosition[2], Piece* board[8][8]) {
+bool processPlayerInput(char turnChar, char* pDesiredPieceToMove, char* pPromotedPiece, int currentPosition[2], int desiredPosition[2], string playerInput, Piece* board[8][8]) {
     string pieces = "KQRBN";
     string promotionPieces = "QRBN";
 
@@ -9,10 +9,48 @@ bool processPlayerInput(string playerInput, char* pDesiredPieceToMove, char* pPr
         playerInput.pop_back();
 
     // Handles castling input
-    // IMPLEMENT CASTLING
     if (!playerInput.compare("O-O") || !playerInput.compare("O-O-O")) {
-        cout << "Castling is not yet implemented\n";
-        return false;
+        if (turnChar == 'W') {
+            if (board[0][4]->getName() != 'K' || board[0][4]->getHasMoved())
+                return false;
+
+            if (!playerInput.compare("O-O") && (board[0][7]->getName() != 'R' || board[0][7]->getHasMoved()))
+                return false;
+
+            if (!playerInput.compare("O-O-O") && (board[0][0]->getName() != 'R' || board[0][0]->getHasMoved()))
+                return false;
+
+            currentPosition[0] = 0;
+
+            desiredPosition[0] = 0;
+        }
+
+        if (turnChar == 'B') {
+            if (board[7][4]->getName() != 'K' || board[7][4]->getHasMoved())
+                return false;
+
+            if (!playerInput.compare("O-O") && (board[7][7]->getName() != 'R' || board[7][7]->getHasMoved()))
+                return false;
+
+            if (!playerInput.compare("O-O-O") && (board[7][0]->getName() != 'R' || board[7][0]->getHasMoved()))
+                return false;
+
+            currentPosition[0] = 7;
+
+            desiredPosition[0] = 7;
+        }
+
+        *pDesiredPieceToMove = 'K';
+
+        currentPosition[1] = 4;
+
+        if (!playerInput.compare("O-O"))
+            desiredPosition[1] = 6;
+
+        if (!playerInput.compare("O-O-O"))
+            desiredPosition[1] = 2;
+
+        return true;
     }
 
     // Handles if pawn promotion is stated in desired move
