@@ -126,6 +126,8 @@ int main() {
                     break;
             }
 
+            promotionPiece = ' ';
+
             // Checks if move has put own king in check
             putSelfInCheck = kingInCheck(turnChar, board);
 
@@ -147,7 +149,6 @@ int main() {
         }
 
         legalMoveCount = 0;
-        promotionPiece = ' ';
 
         moves.push_back(playerInput);
 
