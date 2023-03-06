@@ -8,6 +8,7 @@ using std::abs, std::string;
 
 class Piece {
    protected:
+    bool mCanEnPassant;  // if piece can be captured by en passant
     bool mHasMoved;
 
     char mColour;
@@ -23,6 +24,7 @@ class Piece {
 
     // Methods
     bool getHasMoved();
+    bool getCanEnPassant();
 
     virtual bool legalPieceMove(int currentRank, int currentFile, int desiredPosition[]);
 
@@ -31,6 +33,7 @@ class Piece {
 
     string getSymbol();
 
+    void setCanEnPassant(bool canEnPassant);
     void setHasMoved();
 };
 

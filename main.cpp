@@ -22,7 +22,6 @@ int main() {
     bool validInput = false;
 
     char desiredPieceToMove = ' ';
-    char prevDesiredPieceToMove = ' ';
     char promotionPiece = ' ';
     char turnChar = 'W';
 
@@ -30,11 +29,10 @@ int main() {
     int turn = 0;  // indicates which player's turn it is, where white = 0 & black = 1
     int currentPosition[2] = {-1, -1};
     int desiredPosition[2] = {-1, -1};
-    int prevCurrentPosition[2] = {-1, -1};
-    int prevDesiredPosition[2] = {-1, -1};
 
     const string ERROR_AMBIGUOUS_MOVE = "This move is ambiguous!\n";
     const string ERROR_CANNOT_CASTLE_WHILE_IN_CHECK = "You cannot castle while in check!\n";
+    const string ERROR_CANNOT_PROMOTE_PIECE = "You cannot promote a piece!\n";
     const string ERROR_ILLEGAL_MOVE = "This is not a legal move!\n";
     const string ERROR_INVALID_INPUT = "This input is not valid!\n";
     const string ERROR_MUST_SPECIFY_PROMOTION_PIECE = "You must specify a promotion piece!\n";
@@ -96,6 +94,12 @@ int main() {
                 legalMoveCount = 1;
             }
 
+            // Prevents promoting for non-pawns
+            if (desiredPieceToMove != 'P' && promotionPiece != ' ') {
+                cout << ERROR_CANNOT_PROMOTE_PIECE;
+                continue;
+            }
+
             // Ensures promotion piece is specified if pawn reaches last rank
             if (desiredPieceToMove == 'P' && promotionPiece == ' ')
                 if ((turnChar == 'W' && desiredPosition[0] == 7) || (turnChar == 'B' && desiredPosition[0] == 0)) {
@@ -109,10 +113,7 @@ int main() {
 
             // Ensures en passant move is valid
             if (desiredPieceToMove == 'P' && currentPosition[1] != desiredPosition[1] && board[desiredPosition[0]][desiredPosition[1]]->getColour() == 'N')
-                if (prevDesiredPieceToMove != 'P' || prevDesiredPosition[1] != desiredPosition[1] || abs(prevDesiredPosition[0] - prevCurrentPosition[0]) != 2)
-                    legalMoveCount = 0;
-                else
-                    enPassant = true;
+                enPassant = true;
             else
                 enPassant = false;
 
@@ -178,15 +179,16 @@ int main() {
                 } else
                     board[desiredPosition[0]][desiredPosition[1]] = destinationPiece;
 
-                cout << "Current board state:\n";
-                printBoard(turn, board);
-
                 legalMoveCount = 0;
 
                 continue;
             }
 
             board[desiredPosition[0]][desiredPosition[1]]->setHasMoved();
+
+            // Sets pawn can be captured by en passant if it has pushed forward 2 squares
+            if (abs(desiredPosition[0] - currentPosition[0]) == 2 && board[desiredPosition[0]][desiredPosition[1]]->getName() == 'P')
+                board[desiredPosition[0]][desiredPosition[1]]->setCanEnPassant(true);
 
             // Moves the rook if castling
             if (playerInput.find("O-O") == string::npos)
@@ -207,18 +209,20 @@ int main() {
 
         legalMoveCount = 0;
 
-        prevDesiredPieceToMove = desiredPieceToMove;
-
-        prevCurrentPosition[0] = currentPosition[0];
-        prevCurrentPosition[1] = currentPosition[1];
-
-        prevDesiredPosition[0] = desiredPosition[0];
-        prevDesiredPosition[1] = desiredPosition[1];
-
         moves.push_back(playerInput);
 
         turn = 1 - turn;
         turn == 0 ? turnChar = 'W' : turnChar = 'B';
+
+        // Sets pawns can't be captured by en passant if they pushed forward 2 squares last turn
+        for (int rank = 0; rank < 8; rank++) {
+            for (int file = 0; file < 8; file++) {
+                if (board[rank][file]->getColour() != turnChar)
+                    continue;
+
+                board[rank][file]->setCanEnPassant(false);
+            }
+        }
     }
 
     if (checkmate) {

@@ -1,14 +1,18 @@
 #include "piece.hpp"
 
 // Constructor
-Piece::Piece() : mHasMoved(false), mColour('N'), mName('_'), mSymbol(" ") {}
+Piece::Piece() : mHasMoved(false), mCanEnPassant(false), mColour('N'), mName('_'), mSymbol(" ") {}
 
 // Constructor used for inherited piece classes
-Piece::Piece(char colour) : mHasMoved(false), mColour(colour) {}
+Piece::Piece(char colour) : mHasMoved(false), mCanEnPassant(false), mColour(colour) {}
 
 // Methods
 bool Piece::getHasMoved() {
     return mHasMoved;
+}
+
+bool Piece::getCanEnPassant() {
+    return mCanEnPassant;
 }
 
 bool Piece::legalPieceMove(int currentRank, int currentFile, int desiredPosition[]) {
@@ -25,6 +29,13 @@ char Piece::getName() {
 
 string Piece::getSymbol() {
     return mSymbol;
+}
+
+void Piece::setCanEnPassant(bool canEnPassant) {
+    if (mName == 'P')
+        mCanEnPassant = canEnPassant;
+    else
+        mCanEnPassant = false;
 }
 
 void Piece::setHasMoved() {

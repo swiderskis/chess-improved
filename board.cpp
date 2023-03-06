@@ -126,6 +126,7 @@ bool kingInCheck(char turnChar, Piece* board[8][8]) {
 // Checks if the king has been checkmated
 bool kingIsCheckmated(char turnChar, Piece* board[8][8]) {
     bool check = false;
+    bool enPassant = false;
 
     int legalMoveCount = 0;
     int currentPosition[] = {-1, -1};
@@ -151,11 +152,23 @@ bool kingIsCheckmated(char turnChar, Piece* board[8][8]) {
 
                     legalMoveCount = checkingLegalMove(board[rankCurr][fileCurr]->getName(), turnChar, currentPosition, desiredPosition, board);
 
+                    // Ensures en passant move is valid
+                    if (board[rankCurr][fileCurr]->getName() == 'P' && desiredPosition[1] != currentPosition[1] && board[desiredPosition[0]][desiredPosition[1]]->getColour() == 'N')
+                        enPassant = true;
+                    else
+                        enPassant = false;
+
                     if (legalMoveCount != 1)
                         continue;
 
+                    // Updates board based on valid move, sees if king is still in check as a result
                     selectedPiece = board[rankCurr][fileCurr];
-                    destinationPiece = board[rankNew][fileNew];
+
+                    if (enPassant) {
+                        destinationPiece = board[rankCurr][fileNew];
+                        board[rankCurr][fileNew] = new Piece();
+                    } else
+                        destinationPiece = board[rankNew][fileNew];
 
                     board[rankCurr][fileCurr] = new Piece();
                     board[rankNew][fileNew] = selectedPiece;
@@ -163,7 +176,12 @@ bool kingIsCheckmated(char turnChar, Piece* board[8][8]) {
                     check = kingInCheck(turnChar, board);
 
                     board[rankCurr][fileCurr] = selectedPiece;
-                    board[rankNew][fileNew] = destinationPiece;
+
+                    if (enPassant) {
+                        board[rankCurr][fileNew] = destinationPiece;
+                        board[rankNew][fileNew] = new Piece();
+                    } else
+                        board[rankNew][fileNew] = destinationPiece;
 
                     if (!check)
                         return false;
@@ -186,7 +204,7 @@ bool legalBoardMove(char desiredPieceToMove, char turnChar, int currentPosition[
 
     // Checks pawn move to sees it is capturing / pushing correctly
     if (board[currentPosition[0]][currentPosition[1]]->getName() == 'P') {
-        if (dFile != 0 && board[desiredPosition[0]][desiredPosition[1]]->getColour() == 'N' && board[currentPosition[0]][desiredPosition[1]]->getName() != 'P')
+        if (dFile != 0 && board[desiredPosition[0]][desiredPosition[1]]->getColour() == 'N' && !board[currentPosition[0]][desiredPosition[1]]->getCanEnPassant())
             return false;
 
         if (dFile == 0 && board[desiredPosition[0]][desiredPosition[1]]->getColour() != 'N')

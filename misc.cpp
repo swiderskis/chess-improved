@@ -62,7 +62,8 @@ bool processPlayerInput(char turnChar, char* pDesiredPieceToMove, char* pPromote
 
         playerInput.pop_back();
         playerInput.pop_back();
-    }
+    } else
+        *pPromotedPiece = ' ';
 
     // Takes last element of playerInput to get desired rank
     if (charToInt(playerInput.back()) < 1 || charToInt(playerInput.back()) > 8)
