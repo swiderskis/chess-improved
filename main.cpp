@@ -17,17 +17,21 @@ using std::cout, std::cin, std::string, std::vector;
 int main() {
     bool check = false;
     bool checkmate = false;
+    bool enPassant = false;
     bool putSelfInCheck = false;
     bool validInput = false;
 
     char desiredPieceToMove = ' ';
+    char prevDesiredPieceToMove = ' ';
     char promotionPiece = ' ';
     char turnChar = 'W';
 
     int legalMoveCount = 0;
     int turn = 0;  // indicates which player's turn it is, where white = 0 & black = 1
-    int currentPosition[] = {-1, -1};
-    int desiredPosition[] = {0, 0};
+    int currentPosition[2] = {-1, -1};
+    int desiredPosition[2] = {-1, -1};
+    int prevCurrentPosition[2] = {-1, -1};
+    int prevDesiredPosition[2] = {-1, -1};
 
     const string ERROR_AMBIGUOUS_MOVE = "This move is ambiguous!\n";
     const string ERROR_CANNOT_CASTLE_WHILE_IN_CHECK = "You cannot castle while in check!\n";
@@ -103,6 +107,15 @@ int main() {
             if (playerInput.find("O-O") == string::npos)  // skip if castling (handled above)
                 legalMoveCount = checkingLegalMove(desiredPieceToMove, turnChar, currentPosition, desiredPosition, board);
 
+            // Ensures en passant move is valid
+            if (desiredPieceToMove == 'P' && currentPosition[1] != desiredPosition[1] && board[desiredPosition[0]][desiredPosition[1]]->getColour() == 'N')
+                if (prevDesiredPieceToMove != 'P' || prevDesiredPosition[1] != desiredPosition[1] || abs(prevDesiredPosition[0] - prevCurrentPosition[0]) != 2)
+                    legalMoveCount = 0;
+                else
+                    enPassant = true;
+            else
+                enPassant = false;
+
             if (legalMoveCount == 0) {
                 cout << ERROR_ILLEGAL_MOVE;
                 continue;
@@ -115,7 +128,12 @@ int main() {
 
             // Updates board state
             selectedPiece = board[currentPosition[0]][currentPosition[1]];
-            destinationPiece = board[desiredPosition[0]][desiredPosition[1]];
+
+            if (enPassant) {
+                destinationPiece = board[currentPosition[0]][desiredPosition[1]];
+                board[currentPosition[0]][desiredPosition[1]] = new Piece();
+            } else
+                destinationPiece = board[desiredPosition[0]][desiredPosition[1]];
 
             board[currentPosition[0]][currentPosition[1]] = new Piece();
 
@@ -153,7 +171,15 @@ int main() {
                     cout << ERROR_PUTS_OWN_KING_IN_CHECK;
 
                 board[currentPosition[0]][currentPosition[1]] = selectedPiece;
-                board[desiredPosition[0]][desiredPosition[1]] = destinationPiece;
+
+                if (enPassant) {
+                    board[currentPosition[0]][desiredPosition[1]] = destinationPiece;
+                    board[desiredPosition[0]][desiredPosition[1]] = new Piece();
+                } else
+                    board[desiredPosition[0]][desiredPosition[1]] = destinationPiece;
+
+                cout << "Current board state:\n";
+                printBoard(turn, board);
 
                 legalMoveCount = 0;
 
@@ -180,6 +206,14 @@ int main() {
         }
 
         legalMoveCount = 0;
+
+        prevDesiredPieceToMove = desiredPieceToMove;
+
+        prevCurrentPosition[0] = currentPosition[0];
+        prevCurrentPosition[1] = currentPosition[1];
+
+        prevDesiredPosition[0] = desiredPosition[0];
+        prevDesiredPosition[1] = desiredPosition[1];
 
         moves.push_back(playerInput);
 

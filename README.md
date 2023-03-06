@@ -12,8 +12,9 @@ It is designed to be a vast improvement on my [earlier](https://github.com/swide
 
 Players input their moves using [algebraic notation](https://en.wikipedia.org/wiki/Algebraic_notation_(chess)).
 Castling is denoted using 'O-O' or 'O-O-O', rather than '0-0' or '0-0-0'.
+Promotion is indicated using e.g. 'e8=Q'.
 
-During their turn, players can also input various commands, including: 'resign' to resign their game, 'draw' to offer their opponent a draw, 'save' to save the current game state into a file, and 'load' to load a saved game.
+During their turn, players can also input various commands, including: 'resign' to resign the game, 'draw' to offer their opponent a draw, 'save' to save the current game state into a file, and 'load' to load a saved game.
 (THESE COMMANDS ARE CURRENTLY UNIMPLEMENTED)
 
 ## Unicode characters in Windows console

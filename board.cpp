@@ -19,7 +19,7 @@ bool castlingValid(char turnChar, int currentPosition[2], int desiredPosition[2]
     // Check if castling is obstructed
     if (desiredPosition[1] == 2) {
         for (int file = 1; file < 4; file++) {
-            if (board[currentPosition[0]][file]->getName() != '_') {
+            if (board[currentPosition[0]][file]->getColour() != 'N') {
                 castlingPrevented = true;
                 break;
             }
@@ -28,7 +28,7 @@ bool castlingValid(char turnChar, int currentPosition[2], int desiredPosition[2]
 
     if (desiredPosition[1] == 6) {
         for (int file = 5; file < 7; file++) {
-            if (board[currentPosition[0]][file]->getName() != '_') {
+            if (board[currentPosition[0]][file]->getColour() != 'N') {
                 castlingPrevented = true;
                 break;
             }
@@ -175,7 +175,7 @@ bool kingIsCheckmated(char turnChar, Piece* board[8][8]) {
     return true;
 }
 
-// Checks if a move is legal in the context of the board (i.e. piece is not obsctructed, pawn is capturing / pushing correctly)
+// Checks if a move is legal in the context of the board (i.e. piece is not obstructed, pawn is capturing / pushing correctly)
 bool legalBoardMove(char desiredPieceToMove, char turnChar, int currentPosition[2], int desiredPosition[2], Piece* board[8][8]) {
     int dRank = desiredPosition[0] - currentPosition[0];
     int dFile = desiredPosition[1] - currentPosition[1];
@@ -186,7 +186,7 @@ bool legalBoardMove(char desiredPieceToMove, char turnChar, int currentPosition[
 
     // Checks pawn move to sees it is capturing / pushing correctly
     if (board[currentPosition[0]][currentPosition[1]]->getName() == 'P') {
-        if (dFile != 0 && board[desiredPosition[0]][desiredPosition[1]]->getColour() == 'N')
+        if (dFile != 0 && board[desiredPosition[0]][desiredPosition[1]]->getColour() == 'N' && board[currentPosition[0]][desiredPosition[1]]->getName() != 'P')
             return false;
 
         if (dFile == 0 && board[desiredPosition[0]][desiredPosition[1]]->getColour() != 'N')
@@ -336,7 +336,6 @@ void printBoard(int turn, Piece* board[8][8]) {
         }
 
         cout << "\n     | a | b | c | d | e | f | g | h\n\n";
-
     } else {
         for (int rank = 0; rank < 8; rank++) {
             cout << " " << rank + 1 << "  ";
