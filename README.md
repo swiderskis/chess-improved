@@ -14,7 +14,7 @@ Players input their moves using [algebraic notation](https://en.wikipedia.org/wi
 Castling is denoted using 'O-O' or 'O-O-O', rather than '0-0' or '0-0-0'.
 Promotion is indicated using e.g. 'e8=Q'.
 
-During their turn, players can also input various commands, including: 'resign' to resign the game, 'draw' to offer their opponent a draw, 'save' to save the current moves played into a file, and 'load' to load a saved game (CURRENTLY UNIMPLEMENTED).
+During their turn, players can also input various commands, including: 'resign' to resign the game, 'draw' to offer their opponent a draw, 'save' to save the current moves played into a file called "PGN.txt", and 'load' to load a saved game from "PGN.txt".
 
 ## Unicode characters in Windows console
 

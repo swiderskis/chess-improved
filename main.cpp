@@ -12,13 +12,15 @@
 #include "piecequeen.hpp"
 #include "piecerook.hpp"
 
-using std::cout, std::cin, std::string, std::vector;
+using std::cout, std::cin, std::string, std::vector, std::to_string;
 
 int main() {
     bool check = false;
     bool checkmate = false;
     bool drawAgreed = false;
     bool enPassant = false;
+    bool failedLoad = false;
+    bool loadingGame = false;
     bool putSelfInCheck = false;
     bool resign = false;
     bool stalemate = false;
@@ -29,6 +31,7 @@ int main() {
     char turn = 'W';
 
     int legalMoveCount = 0;
+    int pgnTurnCount = 1;
     int currentPosition[2] = {-1, -1};
     int desiredPosition[2] = {-1, -1};
 
@@ -36,14 +39,16 @@ int main() {
     const string ERROR_CANNOT_CASTLE_WHILE_IN_CHECK = "You cannot castle while in check!\n";
     const string ERROR_CANNOT_PROMOTE_PIECE = "You cannot promote a piece!\n";
     const string ERROR_ILLEGAL_MOVE = "This is not a legal move!\n";
-    const string ERROR_INVALID_INPUT = "This input is not valid!\n";
+    const string ERROR_INVALID_INPUT = "This input is invalid!\n";
+    const string ERROR_INVALID_PGN_FILE = "The PGN file is invalid and could not be loaded!\n";
     const string ERROR_MUST_SPECIFY_PROMOTION_PIECE = "You must specify a promotion piece!\n";
     const string ERROR_OWN_KING_STILL_IN_CHECK = "Your king is still in check!\n";
     const string ERROR_PUTS_OWN_KING_IN_CHECK = "This puts your own king in check!\n";
 
     string playerInput = "";
 
-    vector<string> moves;
+    vector<string> loadedPgn;
+    vector<string> pgn;
 
     Piece* selectedPiece;
     Piece* destinationPiece;
@@ -55,6 +60,12 @@ int main() {
     while (1) {
         clearConsole();
         printBoard(turn, board);
+
+        if (failedLoad) {
+            failedLoad = false;
+
+            cout << ERROR_INVALID_PGN_FILE;
+        }
 
         check = kingInCheck(turn, board);
 
@@ -71,21 +82,43 @@ int main() {
             cout << "king is in check!\n";
         }
 
+        // Adds turn counter to PGN
+        if (turn == 'W') {
+            pgn.push_back(to_string(pgnTurnCount) + ".");
+            pgnTurnCount++;
+        }
+
         // Loop to handle player inputting their desired move
         while (legalMoveCount != 1) {
-            turn == 'W' ? cout << "White, " : cout << "Black, ";
-            cout << "please input your move:\n";
-            cin >> playerInput;
+            if (loadingGame) {
+                playerInput = loadedPgn.front();
+            } else {
+                turn == 'W' ? cout << "White, " : cout << "Black, ";
+                cout << "please input your move:\n";
+                cin >> playerInput;
+            }
 
             // Checks if input is valid
             validInput = processPlayerInput(turn, &desiredPieceToMove, &promotionPiece, currentPosition, desiredPosition, playerInput, board);
 
             if (!validInput) {
+                if (loadingGame) {
+                    failedLoad = true;
+
+                    break;
+                }
+
                 cout << ERROR_INVALID_INPUT;
                 continue;
             }
 
             if (!playerInput.compare("draw")) {
+                if (loadingGame) {
+                    failedLoad = true;
+
+                    break;
+                }
+
                 turn == 'W' ? cout << "Black, " : cout << "White, ";
                 cout << "do you accept a draw? (Y/N)\n";
                 cin >> playerInput;
@@ -99,31 +132,86 @@ int main() {
                 break;
             }
 
+            if (!playerInput.compare("load")) {
+                if (loadingGame) {
+                    failedLoad = true;
+
+                    break;
+                }
+
+                cout << "This will close your current game without saving! Would you like to continue? (Y/N)\n";
+                cin >> playerInput;
+
+                if (playerInput.compare("Y"))
+                    continue;
+
+                initialiseBoard(board);
+
+                turn = 'W';
+
+                loadingGame = true;
+
+                loadedPgn = loadGame();
+
+                continue;
+            }
+
             if (!playerInput.compare("resign")) {
+                if (loadingGame) {
+                    failedLoad = true;
+
+                    break;
+                }
+
                 resign = true;
                 break;
             }
 
             if (!playerInput.compare("save")) {
-                saveGame(moves);
+                if (loadingGame) {
+                    failedLoad = true;
+
+                    break;
+                }
+
+                saveGame(pgn);
                 continue;
             }
 
             // Handles castling
             if (playerInput.find("O-O") != string::npos) {
                 if (check) {
+                    if (loadingGame) {
+                        failedLoad = true;
+
+                        break;
+                    }
+
                     cout << ERROR_CANNOT_CASTLE_WHILE_IN_CHECK;
                     continue;
                 }
 
-                if (!castlingValid(turn, currentPosition, desiredPosition, board))
+                if (!castlingValid(turn, currentPosition, desiredPosition, board)) {
+                    if (loadingGame) {
+                        failedLoad = true;
+
+                        break;
+                    }
+
                     continue;
+                }
 
                 legalMoveCount = 1;
             }
 
             // Prevents promoting for non-pawns
             if (desiredPieceToMove != 'P' && promotionPiece != ' ') {
+                if (loadingGame) {
+                    failedLoad = true;
+
+                    break;
+                }
+
                 cout << ERROR_CANNOT_PROMOTE_PIECE;
                 continue;
             }
@@ -131,6 +219,12 @@ int main() {
             // Ensures promotion piece is specified if pawn reaches last rank
             if (desiredPieceToMove == 'P' && promotionPiece == ' ')
                 if ((turn == 'W' && desiredPosition[0] == 7) || (turn == 'B' && desiredPosition[0] == 0)) {
+                    if (loadingGame) {
+                        failedLoad = true;
+
+                        break;
+                    }
+
                     cout << ERROR_MUST_SPECIFY_PROMOTION_PIECE;
                     continue;
                 }
@@ -146,11 +240,23 @@ int main() {
                 enPassant = false;
 
             if (legalMoveCount == 0) {
+                if (loadingGame) {
+                    failedLoad = true;
+
+                    break;
+                }
+
                 cout << ERROR_ILLEGAL_MOVE;
                 continue;
             }
 
             if (legalMoveCount > 1) {
+                if (loadingGame) {
+                    failedLoad = true;
+
+                    break;
+                }
+
                 cout << ERROR_AMBIGUOUS_MOVE;
                 continue;
             }
@@ -194,6 +300,12 @@ int main() {
             putSelfInCheck = kingInCheck(turn, board);
 
             if (putSelfInCheck) {
+                if (loadingGame) {
+                    failedLoad = true;
+
+                    break;
+                }
+
                 if (check)
                     cout << ERROR_OWN_KING_STILL_IN_CHECK;
                 else
@@ -235,12 +347,25 @@ int main() {
             }
         }
 
+        // Resets the game if load failed
+        if (failedLoad) {
+            loadingGame = false;
+
+            turn = 'W';
+
+            loadedPgn.clear();
+
+            initialiseBoard(board);
+
+            continue;
+        }
+
         if (resign || drawAgreed)
             break;
 
         legalMoveCount = 0;
 
-        moves.push_back(playerInput);
+        pgn.push_back(playerInput);
 
         turn == 'W' ? turn = 'B' : turn = 'W';
 
@@ -253,18 +378,25 @@ int main() {
                 board[rank][file]->setCanEnPassant(false);
             }
         }
+
+        if (loadingGame) {
+            if (loadedPgn.size() > 0)
+                loadedPgn.erase(loadedPgn.begin());
+
+            if (loadedPgn.size() == 0)
+                loadingGame = false;
+        }
     }
 
     if (checkmate || resign) {
-        turn == 'W' ? moves.push_back("0-1") : moves.push_back("1-0");
+        turn == 'W' ? pgn.push_back("0-1") : pgn.push_back("1-0");
 
         turn == 'W' ? cout << "Black " : cout << "White ";
         cout << "wins!\n";
-        cin >> playerInput;
     }
 
     if (drawAgreed || stalemate) {
-        moves.push_back("1/2-1/2");
+        pgn.push_back("1/2-1/2");
 
         if (stalemate)
             cout << "Stalemate!\n";
@@ -276,7 +408,7 @@ int main() {
     cin >> playerInput;
 
     if (!playerInput.compare("Y"))
-        saveGame(moves);
+        saveGame(pgn);
 
     return 0;
 }

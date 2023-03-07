@@ -4,7 +4,7 @@
 bool processPlayerInput(char turn, char* pDesiredPieceToMove, char* pPromotedPiece, int currentPosition[2], int desiredPosition[2], string playerInput, Piece* board[8][8]) {
     string pieces = "KQRBN";
     string promotionPieces = "QRBN";
-    string commands[] = {"draw", "resign", "save"};
+    string commands[] = {"draw", "load", "resign", "save"};
 
     if (find(begin(commands), end(commands), playerInput) != end(commands))
         return true;
@@ -124,12 +124,14 @@ int letterToInt(char character) {
     return (int)character - 'a';
 }
 
-// Saves current moves to a .txt file
+// Saves current game to PGN.txt file
 void saveGame(vector<string> moves) {
-    ofstream output_file("./game.txt");
+    ofstream outputFile("./PGN.txt");
 
-    ostream_iterator<string> output_iterator(output_file, " ");
-    copy(begin(moves), end(moves), output_iterator);
+    ostream_iterator<string> outputIterator(outputFile, " ");
+    copy(begin(moves), end(moves), outputIterator);
+
+    outputFile.close();
 }
 
 // Clears console
@@ -144,4 +146,26 @@ void clearConsole() {
 #elif defined(__APPLE__)
     system("clear");
 #endif
+}
+
+// Loads game from PGN.txt file
+vector<string> loadGame() {
+    string pgnElement = " ";
+
+    vector<string> loadedPgn;
+
+    ifstream inputFile("./PGN.txt");
+
+    while (!inputFile.eof()) {
+        inputFile >> pgnElement;
+
+        if (pgnElement.back() == '.')
+            continue;
+
+        loadedPgn.push_back(pgnElement);
+    }
+
+    inputFile.close();
+
+    return loadedPgn;
 }
