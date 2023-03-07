@@ -74,58 +74,8 @@ bool castlingValid(char turn, int currentPosition[2], int desiredPosition[2], Pi
     return true;
 }
 
-// Checks if the king is in check
-bool kingInCheck(char turn, Piece* board[8][8]) {
-    char opponentColour = ' ';
-
-    int hasKingInCheckCount = 0;
-    int kingPos[2] = {-1, -1};
-    int opponentPos[2] = {-1, -1};
-
-    turn == 'W' ? opponentColour = 'B' : opponentColour = 'W';
-
-    // Finds position of king
-    for (int rank = 0; rank < 8; rank++) {
-        for (int file = 0; file < 8; file++) {
-            if (board[rank][file]->getName() != 'K')
-                continue;
-
-            if (board[rank][file]->getColour() != turn)
-                continue;
-
-            kingPos[0] = rank;
-            kingPos[1] = file;
-
-            break;
-        }
-
-        // Breaks out of second for loop once king position found
-        if (kingPos[0] != -1 && kingPos[1] != -1)
-            break;
-    }
-
-    // Sees if any opponent piece can move to the king's square
-    for (int rank = 0; rank < 8; rank++) {
-        for (int file = 0; file < 8; file++) {
-            if (board[rank][file]->getColour() != opponentColour)
-                continue;
-
-            opponentPos[0] = rank;
-            opponentPos[1] = file;
-
-            hasKingInCheckCount = checkingLegalMove(board[rank][file]->getName(), opponentColour, opponentPos, kingPos, board);
-
-            if (hasKingInCheckCount > 0)
-                return true;
-        }
-    }
-
-    return false;
-}
-
-// Checks if the king has been checkmated
-// Also used for if a player is in stalemate
-bool kingIsCheckmated(char turn, Piece* board[8][8]) {
+// Checks if player has legal move, used for checkmate / stalemate checks
+bool hasLegalMove(char turn, Piece* board[8][8]) {
     bool check = false;
     bool enPassant = false;
 
@@ -185,13 +135,62 @@ bool kingIsCheckmated(char turn, Piece* board[8][8]) {
                         board[rankNew][fileNew] = destinationPiece;
 
                     if (!check)
-                        return false;
+                        return true;
                 }
             }
         }
     }
 
-    return true;
+    return false;
+}
+
+// Checks if the king is in check
+bool kingInCheck(char turn, Piece* board[8][8]) {
+    char opponentColour = ' ';
+
+    int hasKingInCheckCount = 0;
+    int kingPos[2] = {-1, -1};
+    int opponentPos[2] = {-1, -1};
+
+    turn == 'W' ? opponentColour = 'B' : opponentColour = 'W';
+
+    // Finds position of king
+    for (int rank = 0; rank < 8; rank++) {
+        for (int file = 0; file < 8; file++) {
+            if (board[rank][file]->getName() != 'K')
+                continue;
+
+            if (board[rank][file]->getColour() != turn)
+                continue;
+
+            kingPos[0] = rank;
+            kingPos[1] = file;
+
+            break;
+        }
+
+        // Breaks out of second for loop once king position found
+        if (kingPos[0] != -1 && kingPos[1] != -1)
+            break;
+    }
+
+    // Sees if any opponent piece can move to the king's square
+    for (int rank = 0; rank < 8; rank++) {
+        for (int file = 0; file < 8; file++) {
+            if (board[rank][file]->getColour() != opponentColour)
+                continue;
+
+            opponentPos[0] = rank;
+            opponentPos[1] = file;
+
+            hasKingInCheckCount = checkingLegalMove(board[rank][file]->getName(), opponentColour, opponentPos, kingPos, board);
+
+            if (hasKingInCheckCount > 0)
+                return true;
+        }
+    }
+
+    return false;
 }
 
 // Checks if a move is legal in the context of the board (i.e. piece is not obstructed, pawn is capturing / pushing correctly)

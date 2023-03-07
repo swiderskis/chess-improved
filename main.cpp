@@ -59,9 +59,9 @@ int main() {
         check = kingInCheck(turn, board);
 
         if (check)
-            checkmate = kingIsCheckmated(turn, board);
+            checkmate = !hasLegalMove(turn, board);
         else
-            stalemate = kingIsCheckmated(turn, board);
+            stalemate = !hasLegalMove(turn, board);
 
         if (checkmate || stalemate)
             break;

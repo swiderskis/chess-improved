@@ -16,11 +16,11 @@ using std::cout;
 // Checks if castling is valid
 bool castlingValid(char turn, int currentPosition[2], int desiredPosition[2], Piece* board[8][8]);
 
+// Checks if player has legal move, used for checkmate / stalemate checks
+bool hasLegalMove(char turn, Piece* board[8][8]);
+
 // Checks if the king is in check
 bool kingInCheck(char turn, Piece* board[8][8]);
-
-// Checks if the king has been checkmated
-bool kingIsCheckmated(char turn, Piece* board[8][8]);
 
 // Checks if a move is legal in the context of the board (i.e. piece is not obsctructed, pawn is capturing / pushing correctly)
 bool legalBoardMove(char desiredPieceToMove, char turn, int currentPosition[2], int desiredPosition[2], Piece* board[8][8]);
