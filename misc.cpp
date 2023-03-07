@@ -4,6 +4,10 @@
 bool processPlayerInput(char turn, char* pDesiredPieceToMove, char* pPromotedPiece, int currentPosition[2], int desiredPosition[2], string playerInput, Piece* board[8][8]) {
     string pieces = "KQRBN";
     string promotionPieces = "QRBN";
+    string commands[] = {"draw", "resign", "save"};
+
+    if (find(begin(commands), end(commands), playerInput) != end(commands))
+        return true;
 
     if (playerInput.back() == '+' || playerInput.back() == '#')
         playerInput.pop_back();
@@ -118,6 +122,14 @@ int charToInt(char character) {
 // Converts a lowercase letter stored as a char to an int, where a = 0, b = 1, etc...
 int letterToInt(char character) {
     return (int)character - 'a';
+}
+
+// Saves current moves to a .txt file
+void saveGame(vector<string> moves) {
+    ofstream output_file("./game.txt");
+
+    ostream_iterator<string> output_iterator(output_file, " ");
+    copy(begin(moves), end(moves), output_iterator);
 }
 
 // Clears console

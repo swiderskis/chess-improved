@@ -17,8 +17,10 @@ using std::cout, std::cin, std::string, std::vector;
 int main() {
     bool check = false;
     bool checkmate = false;
+    bool drawAgreed = false;
     bool enPassant = false;
     bool putSelfInCheck = false;
+    bool resign = false;
     bool validInput = false;
 
     char desiredPieceToMove = ' ';
@@ -77,6 +79,30 @@ int main() {
 
             if (!validInput) {
                 cout << ERROR_INVALID_INPUT;
+                continue;
+            }
+
+            if (!playerInput.compare("draw")) {
+                turn == 'W' ? cout << "Black, " : cout << "White, ";
+                cout << "do you accept a draw? (Y/N)\n";
+                cin >> playerInput;
+
+                if (playerInput.compare("Y")) {
+                    cout << "Draw declined\n";
+                    continue;
+                }
+
+                drawAgreed = true;
+                break;
+            }
+
+            if (!playerInput.compare("resign")) {
+                resign = true;
+                break;
+            }
+
+            if (!playerInput.compare("save")) {
+                saveGame(moves);
                 continue;
             }
 
@@ -206,6 +232,9 @@ int main() {
             }
         }
 
+        if (resign || drawAgreed)
+            break;
+
         legalMoveCount = 0;
 
         moves.push_back(playerInput);
@@ -223,12 +252,25 @@ int main() {
         }
     }
 
-    if (checkmate) {
+    if (checkmate || resign) {
         turn == 'W' ? moves.push_back("0-1") : moves.push_back("1-0");
 
         turn == 'W' ? cout << "Black " : cout << "White ";
         cout << "wins!\n";
+        cin >> playerInput;
     }
+
+    if (drawAgreed) {
+        moves.push_back("1/2-1/2");
+
+        cout << "Draw!\n";
+    }
+
+    cout << "Would you like to save this game? (Y/N)\n";
+    cin >> playerInput;
+
+    if (!playerInput.compare("Y"))
+        saveGame(moves);
 
     return 0;
 }
