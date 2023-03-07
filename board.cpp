@@ -124,6 +124,7 @@ bool kingInCheck(char turn, Piece* board[8][8]) {
 }
 
 // Checks if the king has been checkmated
+// Also used for if a player is in stalemate
 bool kingIsCheckmated(char turn, Piece* board[8][8]) {
     bool check = false;
     bool enPassant = false;

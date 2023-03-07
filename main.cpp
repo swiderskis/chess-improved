@@ -21,6 +21,7 @@ int main() {
     bool enPassant = false;
     bool putSelfInCheck = false;
     bool resign = false;
+    bool stalemate = false;
     bool validInput = false;
 
     char desiredPieceToMove = ' ';
@@ -59,8 +60,10 @@ int main() {
 
         if (check)
             checkmate = kingIsCheckmated(turn, board);
+        else
+            stalemate = kingIsCheckmated(turn, board);
 
-        if (checkmate)
+        if (checkmate || stalemate)
             break;
 
         if (check) {
@@ -260,10 +263,13 @@ int main() {
         cin >> playerInput;
     }
 
-    if (drawAgreed) {
+    if (drawAgreed || stalemate) {
         moves.push_back("1/2-1/2");
 
-        cout << "Draw!\n";
+        if (stalemate)
+            cout << "Stalemate!\n";
+        else
+            cout << "Draw!\n";
     }
 
     cout << "Would you like to save this game? (Y/N)\n";
