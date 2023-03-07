@@ -23,10 +23,9 @@ int main() {
 
     char desiredPieceToMove = ' ';
     char promotionPiece = ' ';
-    char turnChar = 'W';
+    char turn = 'W';
 
     int legalMoveCount = 0;
-    int turn = 0;  // indicates which player's turn it is, where white = 0 & black = 1
     int currentPosition[2] = {-1, -1};
     int desiredPosition[2] = {-1, -1};
 
@@ -54,27 +53,27 @@ int main() {
         clearConsole();
         printBoard(turn, board);
 
-        check = kingInCheck(turnChar, board);
+        check = kingInCheck(turn, board);
 
         if (check)
-            checkmate = kingIsCheckmated(turnChar, board);
+            checkmate = kingIsCheckmated(turn, board);
 
         if (checkmate)
             break;
 
         if (check) {
-            turn == 0 ? cout << "White's " : cout << "Black's ";
+            turn == 'W' ? cout << "White's " : cout << "Black's ";
             cout << "king is in check!\n";
         }
 
         // Loop to handle player inputting their desired move
         while (legalMoveCount != 1) {
-            turn == 0 ? cout << "White, " : cout << "Black, ";
+            turn == 'W' ? cout << "White, " : cout << "Black, ";
             cout << "please input your move:\n";
             cin >> playerInput;
 
             // Checks if input is valid
-            validInput = processPlayerInput(turnChar, &desiredPieceToMove, &promotionPiece, currentPosition, desiredPosition, playerInput, board);
+            validInput = processPlayerInput(turn, &desiredPieceToMove, &promotionPiece, currentPosition, desiredPosition, playerInput, board);
 
             if (!validInput) {
                 cout << ERROR_INVALID_INPUT;
@@ -88,7 +87,7 @@ int main() {
                     continue;
                 }
 
-                if (!castlingValid(turnChar, currentPosition, desiredPosition, board))
+                if (!castlingValid(turn, currentPosition, desiredPosition, board))
                     continue;
 
                 legalMoveCount = 1;
@@ -102,14 +101,14 @@ int main() {
 
             // Ensures promotion piece is specified if pawn reaches last rank
             if (desiredPieceToMove == 'P' && promotionPiece == ' ')
-                if ((turnChar == 'W' && desiredPosition[0] == 7) || (turnChar == 'B' && desiredPosition[0] == 0)) {
+                if ((turn == 'W' && desiredPosition[0] == 7) || (turn == 'B' && desiredPosition[0] == 0)) {
                     cout << ERROR_MUST_SPECIFY_PROMOTION_PIECE;
                     continue;
                 }
 
             // Ensures move is legal and unambiguous
             if (playerInput.find("O-O") == string::npos)  // skip if castling (handled above)
-                legalMoveCount = checkingLegalMove(desiredPieceToMove, turnChar, currentPosition, desiredPosition, board);
+                legalMoveCount = checkingLegalMove(desiredPieceToMove, turn, currentPosition, desiredPosition, board);
 
             // Ensures en passant move is valid
             if (desiredPieceToMove == 'P' && currentPosition[1] != desiredPosition[1] && board[desiredPosition[0]][desiredPosition[1]]->getColour() == 'N')
@@ -140,19 +139,19 @@ int main() {
 
             switch (promotionPiece) {
                 case 'Q':
-                    board[desiredPosition[0]][desiredPosition[1]] = new PieceQueen(turnChar);
+                    board[desiredPosition[0]][desiredPosition[1]] = new PieceQueen(turn);
                     break;
 
                 case 'R':
-                    board[desiredPosition[0]][desiredPosition[1]] = new PieceRook(turnChar);
+                    board[desiredPosition[0]][desiredPosition[1]] = new PieceRook(turn);
                     break;
 
                 case 'B':
-                    board[desiredPosition[0]][desiredPosition[1]] = new PieceBishop(turnChar);
+                    board[desiredPosition[0]][desiredPosition[1]] = new PieceBishop(turn);
                     break;
 
                 case 'N':
-                    board[desiredPosition[0]][desiredPosition[1]] = new PieceKnight(turnChar);
+                    board[desiredPosition[0]][desiredPosition[1]] = new PieceKnight(turn);
                     break;
 
                 default:
@@ -163,7 +162,7 @@ int main() {
             promotionPiece = ' ';
 
             // Checks if move has put own king in check
-            putSelfInCheck = kingInCheck(turnChar, board);
+            putSelfInCheck = kingInCheck(turn, board);
 
             if (putSelfInCheck) {
                 if (check)
@@ -211,13 +210,12 @@ int main() {
 
         moves.push_back(playerInput);
 
-        turn = 1 - turn;
-        turn == 0 ? turnChar = 'W' : turnChar = 'B';
+        turn == 'W' ? turn = 'B' : turn = 'W';
 
         // Sets pawns can't be captured by en passant if they pushed forward 2 squares last turn
         for (int rank = 0; rank < 8; rank++) {
             for (int file = 0; file < 8; file++) {
-                if (board[rank][file]->getColour() != turnChar)
+                if (board[rank][file]->getColour() != turn)
                     continue;
 
                 board[rank][file]->setCanEnPassant(false);
@@ -226,9 +224,9 @@ int main() {
     }
 
     if (checkmate) {
-        turn == 0 ? moves.push_back("0-1") : moves.push_back("1-0");
+        turn == 'W' ? moves.push_back("0-1") : moves.push_back("1-0");
 
-        turn == 0 ? cout << "Black " : cout << "White ";
+        turn == 'W' ? cout << "Black " : cout << "White ";
         cout << "wins!\n";
     }
 

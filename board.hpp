@@ -14,24 +14,24 @@
 using std::cout;
 
 // Checks if castling is valid
-bool castlingValid(char turnChar, int currentPosition[2], int desiredPosition[2], Piece* board[8][8]);
+bool castlingValid(char turn, int currentPosition[2], int desiredPosition[2], Piece* board[8][8]);
 
 // Checks if the king is in check
-bool kingInCheck(char turnChar, Piece* board[8][8]);
+bool kingInCheck(char turn, Piece* board[8][8]);
 
 // Checks if the king has been checkmated
-bool kingIsCheckmated(char turnChar, Piece* board[8][8]);
+bool kingIsCheckmated(char turn, Piece* board[8][8]);
 
 // Checks if a move is legal in the context of the board (i.e. piece is not obsctructed, pawn is capturing / pushing correctly)
-bool legalBoardMove(char desiredPieceToMove, char turnChar, int currentPosition[2], int desiredPosition[2], Piece* board[8][8]);
+bool legalBoardMove(char desiredPieceToMove, char turn, int currentPosition[2], int desiredPosition[2], Piece* board[8][8]);
 
 // Checks the input move is legal and unambiguous
-int checkingLegalMove(char desiredPieceToMove, char turnChar, int currentPosition[2], int desiredPosition[2], Piece* board[8][8]);
+int checkingLegalMove(char desiredPieceToMove, char turn, int currentPosition[2], int desiredPosition[2], Piece* board[8][8]);
 
 // Initialises board
 void initialiseBoard(Piece* board[8][8]);
 
 // Prints the current board state, flipping it based on the current player's turn
-void printBoard(int turn, Piece* board[8][8]);
+void printBoard(char turn, Piece* board[8][8]);
 
 #endif

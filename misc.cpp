@@ -1,7 +1,7 @@
 #include "misc.hpp"
 
 // Takes the player's input and interprets the intended move
-bool processPlayerInput(char turnChar, char* pDesiredPieceToMove, char* pPromotedPiece, int currentPosition[2], int desiredPosition[2], string playerInput, Piece* board[8][8]) {
+bool processPlayerInput(char turn, char* pDesiredPieceToMove, char* pPromotedPiece, int currentPosition[2], int desiredPosition[2], string playerInput, Piece* board[8][8]) {
     string pieces = "KQRBN";
     string promotionPieces = "QRBN";
 
@@ -10,7 +10,7 @@ bool processPlayerInput(char turnChar, char* pDesiredPieceToMove, char* pPromote
 
     // Handles castling input
     if (!playerInput.compare("O-O") || !playerInput.compare("O-O-O")) {
-        if (turnChar == 'W') {
+        if (turn == 'W') {
             if (board[0][4]->getName() != 'K' || board[0][4]->getHasMoved())
                 return false;
 
@@ -25,7 +25,7 @@ bool processPlayerInput(char turnChar, char* pDesiredPieceToMove, char* pPromote
             desiredPosition[0] = 0;
         }
 
-        if (turnChar == 'B') {
+        if (turn == 'B') {
             if (board[7][4]->getName() != 'K' || board[7][4]->getHasMoved())
                 return false;
 

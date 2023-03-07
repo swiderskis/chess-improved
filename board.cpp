@@ -1,7 +1,7 @@
 #include "board.hpp"
 
 // Checks if castling is valid
-bool castlingValid(char turnChar, int currentPosition[2], int desiredPosition[2], Piece* board[8][8]) {
+bool castlingValid(char turn, int currentPosition[2], int desiredPosition[2], Piece* board[8][8]) {
     bool castlingPrevented = false;
 
     char opponentColour = ' ';
@@ -12,7 +12,7 @@ bool castlingValid(char turnChar, int currentPosition[2], int desiredPosition[2]
     const string ERROR_CASTLING_OBSTRUCTED = "A piece is obstructing your ability to castle!\n";
     const string ERROR_CASTLING_SQUARE_ATTACKED = "An enemy piece is attacking the square your king is trying to castle through!\n";
 
-    turnChar == 'W' ? opponentColour = 'B' : opponentColour = 'W';
+    turn == 'W' ? opponentColour = 'B' : opponentColour = 'W';
 
     castlingThroughSquare[0] = currentPosition[0];
 
@@ -75,14 +75,14 @@ bool castlingValid(char turnChar, int currentPosition[2], int desiredPosition[2]
 }
 
 // Checks if the king is in check
-bool kingInCheck(char turnChar, Piece* board[8][8]) {
+bool kingInCheck(char turn, Piece* board[8][8]) {
     char opponentColour = ' ';
 
     int hasKingInCheckCount = 0;
     int kingPos[2] = {-1, -1};
     int opponentPos[2] = {-1, -1};
 
-    turnChar == 'W' ? opponentColour = 'B' : opponentColour = 'W';
+    turn == 'W' ? opponentColour = 'B' : opponentColour = 'W';
 
     // Finds position of king
     for (int rank = 0; rank < 8; rank++) {
@@ -90,7 +90,7 @@ bool kingInCheck(char turnChar, Piece* board[8][8]) {
             if (board[rank][file]->getName() != 'K')
                 continue;
 
-            if (board[rank][file]->getColour() != turnChar)
+            if (board[rank][file]->getColour() != turn)
                 continue;
 
             kingPos[0] = rank;
@@ -124,7 +124,7 @@ bool kingInCheck(char turnChar, Piece* board[8][8]) {
 }
 
 // Checks if the king has been checkmated
-bool kingIsCheckmated(char turnChar, Piece* board[8][8]) {
+bool kingIsCheckmated(char turn, Piece* board[8][8]) {
     bool check = false;
     bool enPassant = false;
 
@@ -138,7 +138,7 @@ bool kingIsCheckmated(char turnChar, Piece* board[8][8]) {
     // Finds a piece that belongs to player
     for (int rankCurr = 0; rankCurr < 8; rankCurr++) {
         for (int fileCurr = 0; fileCurr < 8; fileCurr++) {
-            if (board[rankCurr][fileCurr]->getColour() != turnChar)
+            if (board[rankCurr][fileCurr]->getColour() != turn)
                 continue;
 
             currentPosition[0] = rankCurr;
@@ -150,7 +150,7 @@ bool kingIsCheckmated(char turnChar, Piece* board[8][8]) {
                     desiredPosition[0] = rankNew;
                     desiredPosition[1] = fileNew;
 
-                    legalMoveCount = checkingLegalMove(board[rankCurr][fileCurr]->getName(), turnChar, currentPosition, desiredPosition, board);
+                    legalMoveCount = checkingLegalMove(board[rankCurr][fileCurr]->getName(), turn, currentPosition, desiredPosition, board);
 
                     // Ensures en passant move is valid
                     if (board[rankCurr][fileCurr]->getName() == 'P' && desiredPosition[1] != currentPosition[1] && board[desiredPosition[0]][desiredPosition[1]]->getColour() == 'N')
@@ -173,7 +173,7 @@ bool kingIsCheckmated(char turnChar, Piece* board[8][8]) {
                     board[rankCurr][fileCurr] = new Piece();
                     board[rankNew][fileNew] = selectedPiece;
 
-                    check = kingInCheck(turnChar, board);
+                    check = kingInCheck(turn, board);
 
                     board[rankCurr][fileCurr] = selectedPiece;
 
@@ -194,12 +194,12 @@ bool kingIsCheckmated(char turnChar, Piece* board[8][8]) {
 }
 
 // Checks if a move is legal in the context of the board (i.e. piece is not obstructed, pawn is capturing / pushing correctly)
-bool legalBoardMove(char desiredPieceToMove, char turnChar, int currentPosition[2], int desiredPosition[2], Piece* board[8][8]) {
+bool legalBoardMove(char desiredPieceToMove, char turn, int currentPosition[2], int desiredPosition[2], Piece* board[8][8]) {
     int dRank = desiredPosition[0] - currentPosition[0];
     int dFile = desiredPosition[1] - currentPosition[1];
 
     // Checks if the desired position is occupied by a piece of the same colour
-    if (board[desiredPosition[0]][desiredPosition[1]]->getColour() == turnChar)
+    if (board[desiredPosition[0]][desiredPosition[1]]->getColour() == turn)
         return false;
 
     // Checks pawn move to sees it is capturing / pushing correctly
@@ -245,7 +245,7 @@ bool legalBoardMove(char desiredPieceToMove, char turnChar, int currentPosition[
 }
 
 // Checks the input move is legal and unambiguous
-int checkingLegalMove(char desiredPieceToMove, char turnChar, int currentPosition[2], int desiredPosition[2], Piece* board[8][8]) {
+int checkingLegalMove(char desiredPieceToMove, char turn, int currentPosition[2], int desiredPosition[2], Piece* board[8][8]) {
     bool pieceMoveIsLegal = false;
     bool boardMoveIsLegal = false;
 
@@ -275,7 +275,7 @@ int checkingLegalMove(char desiredPieceToMove, char turnChar, int currentPositio
             if (board[rankCurr][fileCurr]->getName() != desiredPieceToMove)
                 continue;
 
-            if (board[rankCurr][fileCurr]->getColour() != turnChar)
+            if (board[rankCurr][fileCurr]->getColour() != turn)
                 continue;
 
             pieceMoveIsLegal = board[rankCurr][fileCurr]->legalPieceMove(rankCurr, fileCurr, desiredPosition);
@@ -286,7 +286,7 @@ int checkingLegalMove(char desiredPieceToMove, char turnChar, int currentPositio
             tempCurrentPosition[0] = rankCurr;
             tempCurrentPosition[1] = fileCurr;
 
-            boardMoveIsLegal = legalBoardMove(desiredPieceToMove, turnChar, tempCurrentPosition, desiredPosition, board);
+            boardMoveIsLegal = legalBoardMove(desiredPieceToMove, turn, tempCurrentPosition, desiredPosition, board);
 
             if (!boardMoveIsLegal)
                 continue;
@@ -339,10 +339,10 @@ void initialiseBoard(Piece* board[8][8]) {
 }
 
 // Prints the current board state, flipping it based on the current player's turn
-void printBoard(int turn, Piece* board[8][8]) {
+void printBoard(char turn, Piece* board[8][8]) {
     cout << "\n";
 
-    if (turn == 0) {
+    if (turn == 'W') {
         for (int rank = 7; rank >= 0; rank--) {
             cout << " " << rank + 1 << "  ";
 
