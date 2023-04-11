@@ -4,7 +4,7 @@
 
 ## About
 
-This is a console program designed to allow two players to play a game of chess, complete with all features such as checkmate, castling, en passant, stalemate etc.
+A console program designed to allow two players to play a game of chess, complete with all features such as checkmate, castling, en passant, stalemate etc. ♟
 
 It is designed to be a vast improvement on my [earlier](https://github.com/swiderskis/chess) version of a chess program.
 
